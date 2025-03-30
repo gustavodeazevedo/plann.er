@@ -2,14 +2,19 @@ FROM node:18-alpine
 
 WORKDIR /opt/render/project/src/backend
 
-# Copy package files and install dependencies
+# Copy package files
 COPY package*.json ./
-RUN npm install
+
+# Install dependencies including production dependencies only
+RUN npm ci --only=production
 
 # Copy source files
 COPY . .
 
-# Create .env file with default values if not provided
+# Create dist directory
+RUN mkdir -p dist
+
+# Create .env file with environment variables
 RUN echo "NODE_ENV=production" > .env \
     && echo "PORT=3333" >> .env \
     && echo "MONGODB_URI=${MONGODB_URI}" >> .env \
@@ -18,9 +23,6 @@ RUN echo "NODE_ENV=production" > .env \
 
 # Build the application
 RUN npm run build
-
-# Move .env to dist folder
-RUN cp .env dist/.env
 
 EXPOSE 3333
 
