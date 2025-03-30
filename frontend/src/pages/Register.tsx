@@ -2,21 +2,25 @@ import { FormEvent, useState } from "react";
 import { AuthForm } from "../components/AuthForm";
 import { api } from "../lib/axios";
 import { AtSign, KeyRound, User } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 export function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const redirect = searchParams.get("redirect");
+  const email = searchParams.get("email");
 
   async function handleRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name")?.toString();
-    const email = formData.get("email")?.toString();
+    const emailInput = formData.get("email")?.toString();
     const password = formData.get("password")?.toString();
 
-    if (!name || !email || !password) {
+    if (!name || !emailInput || !password) {
       alert("Preencha todos os campos");
       return;
     }
@@ -25,14 +29,24 @@ export function Register() {
     try {
       const response = await api.post("/auth/register", {
         name,
-        email,
+        email: emailInput,
         password,
       });
 
       localStorage.setItem("@planner:token", response.data.token);
       localStorage.setItem("@planner:user", JSON.stringify(response.data.user));
 
-      navigate("/");
+      // Se o usuário veio de um convite e é o email correto, confirma a participação
+      if (email && email === emailInput && redirect?.includes("/trip/")) {
+        const tripId = redirect.split("/trip/")[1].split("?")[0];
+        try {
+          await api.post(`/trips/${tripId}/confirm`, { email: emailInput });
+        } catch (error) {
+          console.error("Erro ao confirmar participação:", error);
+        }
+      }
+
+      navigate(redirect || "/");
     } catch (error: any) {
       if (error.response?.data?.error === "User already exists") {
         alert("Este e-mail já está cadastrado");
@@ -52,7 +66,12 @@ export function Register() {
       footer={
         <>
           Já tem uma conta?{" "}
-          <Link to="/login" className="text-zinc-300 underline">
+          <Link
+            to={`/login${
+              redirect ? `?redirect=${redirect}&email=${email}` : ""
+            }`}
+            className="text-zinc-300 underline"
+          >
             Fazer login
           </Link>
         </>
@@ -77,6 +96,7 @@ export function Register() {
             type="email"
             name="email"
             placeholder="Seu e-mail"
+            defaultValue={email || ""}
             className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
           />
         </div>

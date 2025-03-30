@@ -1,9 +1,12 @@
 import mongoose, { Document } from "mongoose";
 
 interface Guest {
-  email: string;
-  confirmed: boolean;
-  confirmedAt?: Date;
+  name: string;
+  accessId: string; // UUID para acesso único
+  permissions: {
+    canEdit: boolean;
+    canInvite: boolean;
+  };
 }
 
 export interface ITrip extends Document {
@@ -12,6 +15,13 @@ export interface ITrip extends Document {
   guests: Guest[];
   isDraft: boolean;
   user: mongoose.Types.ObjectId;
+  collaborators: {
+    userId: mongoose.Types.ObjectId;
+    permissions: {
+      canEdit: boolean;
+      canInvite: boolean;
+    };
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,16 +38,24 @@ const tripSchema = new mongoose.Schema(
     },
     guests: [
       {
-        email: {
+        name: {
           type: String,
           required: true,
         },
-        confirmed: {
-          type: Boolean,
-          default: false,
+        accessId: {
+          type: String,
+          required: true,
+          unique: true,
         },
-        confirmedAt: {
-          type: Date,
+        permissions: {
+          canEdit: {
+            type: Boolean,
+            default: true,
+          },
+          canInvite: {
+            type: Boolean,
+            default: true,
+          },
         },
       },
     ],
@@ -50,6 +68,25 @@ const tripSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    collaborators: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        permissions: {
+          canEdit: {
+            type: Boolean,
+            default: true,
+          },
+          canInvite: {
+            type: Boolean,
+            default: true,
+          },
+        },
+      },
+    ],
   },
   {
     timestamps: true,

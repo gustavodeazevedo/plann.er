@@ -8,6 +8,8 @@ import { Register } from "./pages/Register";
 import { ForgotPassword } from "./pages/ForgotPassword";
 import { ResetPassword } from "./pages/ResetPassword";
 import { TripInvite } from "./pages/TripInvite";
+import { TripDetails } from "./pages/TripDetails";
+import { GuestAccess } from "./pages/GuestAccess";
 import { PrivateRoute } from "./components/PrivateRoute";
 import "./index.css";
 
@@ -21,6 +23,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/trip/invite/:id" element={<TripInvite />} />
+          <Route path="/trip/guest/:id/:accessId" element={<GuestAccess />} />
+          <Route
+            path="/trip/:id"
+            element={
+              <PrivateRoute>
+                <TripDetails />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/"
             element={

@@ -17,6 +17,7 @@ router.post("/auth/reset-password", userController.resetPassword);
 // Public Trip routes
 router.get("/trips/:id/public", tripController.showPublic);
 router.post("/trips/:id/confirm", tripController.confirmParticipation);
+router.get("/trips/:id/guest/:accessId", tripController.showGuestAccess); // Nova rota para acesso do convidado
 
 // Protected Trip routes
 router.use("/trips", authMiddleware);
@@ -26,5 +27,6 @@ router.get("/trips", tripController.index);
 router.patch("/trips/:id", tripController.update);
 router.delete("/trips/:id", tripController.delete);
 router.post("/trips/:id/invite", tripController.sendInvitation);
+router.post("/trips/:id/guests", tripController.addGuest); // Nova rota para adicionar convidado
 
 export { router };
