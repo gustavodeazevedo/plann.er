@@ -3,8 +3,12 @@ import { User } from "../models/User";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendMail } from "../services/mail";
+import { OAuth2Client } from "google-auth-library";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default-secret";
+const GOOGLE_CLIENT_ID =
+  "804681981965-p0i2u26uc2j5qj5pk8che46cidk3i0ik.apps.googleusercontent.com";
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export class UserController {
   async register(req: Request, res: Response) {
@@ -144,6 +148,67 @@ export class UserController {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  async googleLogin(req: Request, res: Response) {
+    try {
+      console.log("Google login request body:", req.body);
+      const { credential } = req.body;
+
+      if (!credential) {
+        console.error("No credential provided");
+        return res.status(400).json({ error: "No credential provided" });
+      }
+
+      console.log("Verifying token with Google...");
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+      console.log("Google token payload:", payload);
+
+      if (!payload || !payload.email) {
+        console.error("Invalid payload or missing email");
+        return res.status(400).json({ error: "Invalid Google token" });
+      }
+
+      let user = await User.findOne({ email: payload.email });
+      console.log("Existing user found:", user ? "yes" : "no");
+
+      if (!user) {
+        console.log("Creating new user with Google data");
+        user = await User.create({
+          name: payload.name,
+          email: payload.email,
+          password: crypto.randomBytes(20).toString("hex"),
+          googleId: payload.sub,
+        });
+      } else if (!user.googleId) {
+        console.log("Updating existing user with Google ID");
+        user.googleId = payload.sub;
+        await user.save();
+      }
+
+      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+      console.log("JWT token generated successfully");
+
+      return res.json({
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+        token,
+      });
+    } catch (error) {
+      console.error("Detailed error in Google login:", error);
+      return res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   }
 }

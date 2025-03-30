@@ -5,6 +5,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  googleId?: string;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   createdAt: Date;
@@ -28,6 +29,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       select: false,
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
     },
     passwordResetToken: String,
     passwordResetExpires: Date,

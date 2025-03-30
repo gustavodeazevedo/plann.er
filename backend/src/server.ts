@@ -12,9 +12,23 @@ console.log("JWT_SECRET no início do servidor:", process.env.JWT_SECRET);
 const app = express();
 const port = process.env.PORT || 3333;
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://plann-er-lake.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin: function (origin, callback) {
+      // Permitir requisições sem origem (como apps mobile ou postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );

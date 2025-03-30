@@ -3,6 +3,7 @@ import { AuthForm } from "../components/AuthForm";
 import { api } from "../lib/axios";
 import { AtSign, KeyRound } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 
 export function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +38,32 @@ export function Login() {
       setIsLoading(false);
     }
   }
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      console.log("Google response:", credentialResponse);
+      const response = await api.post("/auth/google", {
+        credential: credentialResponse.credential,
+      });
+
+      console.log("API response:", response.data);
+      localStorage.setItem("@planner:token", response.data.token);
+      localStorage.setItem("@planner:user", JSON.stringify(response.data.user));
+
+      navigate("/");
+    } catch (error: any) {
+      console.error(
+        "Error in Google login:",
+        error.response?.data || error.message
+      );
+      alert("Erro ao fazer login com Google. Tente novamente.");
+    }
+  };
+
+  const handleGoogleError = () => {
+    console.error("Google login error occurred");
+    alert("Erro ao fazer login com Google. Tente novamente.");
+  };
 
   return (
     <AuthForm
@@ -81,6 +108,17 @@ export function Login() {
           >
             Esqueceu a senha?
           </Link>
+        </div>
+
+        <div className="flex justify-center mt-4">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="filled_black"
+            text="signin_with"
+            shape="rectangular"
+            locale="pt_BR"
+          />
         </div>
       </div>
     </AuthForm>

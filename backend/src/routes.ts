@@ -10,6 +10,7 @@ const userController = new UserController();
 // Auth routes
 router.post("/auth/register", userController.register);
 router.post("/auth/login", userController.login);
+router.post("/auth/google", userController.googleLogin);
 router.post("/auth/forgot-password", userController.forgotPassword);
 router.post("/auth/reset-password", userController.resetPassword);
 
