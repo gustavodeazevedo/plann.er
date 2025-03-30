@@ -168,9 +168,9 @@ export function App() {
     <div className="min-h-screen flex flex-col bg-pattern bg-no-repeat bg-center">
       {user && (
         <div className="w-full">
-          <div className="max-w-3xl mx-auto py-4 text-center">
+          <div className="max-w-3xl mx-auto py-4 px-4 sm:px-6 text-center">
             <span
-              className="text-2xl font-medium"
+              className="text-xl sm:text-2xl font-medium"
               style={{
                 background:
                   "linear-gradient(90deg, #a3e635 10%, #ffffff 50%, #ADFF2F 90%)",
@@ -189,112 +189,115 @@ export function App() {
         </div>
       )}
 
-      <div className="flex-1 flex items-center justify-center">
-        <div className="max-w-3xl w-full px-6 text-center space-y-10">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-0">
+        <div className="max-w-3xl w-full px-4 sm:px-6 text-center space-y-6 sm:space-y-10">
           <div className="flex flex-col items-center gap-3">
             <div className="w-full flex items-center justify-between">
-              <img src="/logo.svg" alt="plann.er" />
+              <img src="/logo.svg" alt="plann.er" className="w-32 sm:w-auto" />
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 text-zinc-400 hover:text-zinc-300"
+                className="flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors"
               >
-                <LogOut className="size-5" />
-                Sair
+                <LogOut className="size-4 sm:size-5" />
+                <span className="hidden sm:inline">Sair</span>
               </button>
             </div>
-            <p className="text-zinc-300 text-lg">
+            <p className="text-zinc-300 text-base sm:text-lg">
               Convide seus amigos e planeje sua próxima viagem!
             </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="h-16 bg-zinc-900 px-4 rounded-xl flex items-center shadow-shape gap-3">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="h-auto sm:h-16 bg-zinc-900 p-3 sm:px-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center shadow-shape gap-3">
               <div className="flex items-center gap-2 flex-1">
-                <MapPin className="size-5 text-zinc-400" />
+                <MapPin className="size-5 text-zinc-400 flex-shrink-0" />
                 <input
                   disabled={isGuestsInputOpen}
                   type="text"
                   placeholder="Para onde você vai?"
-                  className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+                  className="bg-transparent text-base sm:text-lg placeholder-zinc-400 outline-none flex-1 min-w-0"
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <Calendar className="size-5 text-zinc-400" />
+                <Calendar className="size-5 text-zinc-400 flex-shrink-0" />
                 <input
                   disabled={isGuestsInputOpen}
                   type="text"
                   placeholder="Quando?"
-                  className="bg-transparent text-lg placeholder-zinc-400 w-40 outline-none"
+                  className="bg-transparent text-base sm:text-lg placeholder-zinc-400 w-full sm:w-40 outline-none"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                 />
               </div>
 
-              <div className="w-px h-6 bg-zinc-800" />
+              <div className="hidden sm:block w-px h-6 bg-zinc-800" />
 
               {isGuestsInputOpen ? (
                 <button
                   onClick={closeGuestsInput}
-                  className="bg-zinc-800 text-zinc-200 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-zinc-700"
+                  className="bg-zinc-800 text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors"
                 >
-                  Alterar local/data
-                  <Settings2 className="size-5" />
+                  <span className="sm:hidden">Alterar</span>
+                  <span className="hidden sm:inline">Alterar local/data</span>
+                  <Settings2 className="size-4 sm:size-5" />
                 </button>
               ) : (
                 <button
                   onClick={openGuestsInput}
-                  className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-lime-400"
+                  className="bg-lime-300 text-lime-950 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-lime-400 transition-colors"
                 >
                   Continuar
-                  <ArrowRight className="size-5" />
+                  <ArrowRight className="size-4 sm:size-5" />
                 </button>
               )}
             </div>
 
             {isGuestsInputOpen && (
-              <div className="h-16 bg-zinc-900 px-4 rounded-xl flex items-center shadow-shape gap-3">
+              <div className="h-auto sm:h-16 bg-zinc-900 p-3 sm:px-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center shadow-shape gap-3">
                 <button
                   type="button"
                   onClick={openGuestsModal}
                   className="flex items-center gap-2 flex-1 text-left"
                 >
-                  <UserRoundPlus className="size-5 text-zinc-400" />
-                  <span className="text-zinc-400 text-lg flex-1 whitespace-normal overflow-wrap=break-word">
+                  <UserRoundPlus className="size-5 text-zinc-400 flex-shrink-0" />
+                  <span className="text-zinc-400 text-base sm:text-lg flex-1">
                     Quem estará na viagem?
                   </span>
                 </button>
 
-                <div className="w-px h-6 bg-zinc-800" />
+                <div className="hidden sm:block w-px h-6 bg-zinc-800" />
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <button
                     onClick={handleShareTrip}
                     disabled={isLoading}
-                    className="bg-zinc-800 text-zinc-200 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-zinc-800 text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Compartilhar
-                    <Share2 className="size-5" />
+                    <span className="sm:hidden">Compartilhar</span>
+                    <span className="hidden sm:inline">
+                      Compartilhar viagem
+                    </span>
+                    <Share2 className="size-4 sm:size-5" />
                   </button>
 
                   <button
                     onClick={() => handleSaveTrip(false)}
                     disabled={isLoading}
-                    className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-lime-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-lime-300 text-lime-950 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-lime-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Confirmar viagem
-                    <ArrowRight className="size-5" />
+                    Confirmar
+                    <ArrowRight className="size-4 sm:size-5" />
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          <p className="text-sm text-zinc-500">
-            Ao planejar sua viagem pela plann.er você automaticamente concorda{" "}
-            <br />
+          <p className="text-xs sm:text-sm text-zinc-500">
+            Ao planejar sua viagem pela plann.er você automaticamente concorda
             com nossos{" "}
             <a className="text-zinc-300 underline" href="#">
               termos de uso
@@ -309,20 +312,22 @@ export function App() {
       </div>
 
       {isGuestsModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-          <div className="w-[640px] rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-[640px] rounded-xl py-5 px-4 sm:px-6 shadow-shape bg-zinc-900 space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h2 className="font-lg font-semibold">Selecionar convidados</h2>
-                <button>
-                  <X
-                    className="size-5 text-zinc-400"
-                    onClick={closeGuestsModal}
-                  />
+                <h2 className="text-base sm:text-lg font-semibold">
+                  Selecionar convidados
+                </h2>
+                <button
+                  onClick={closeGuestsModal}
+                  className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                >
+                  <X className="size-4 sm:size-5 text-zinc-400" />
                 </button>
               </div>
 
-              <p className="text-sm text-zinc-400">
+              <p className="text-xs sm:text-sm text-zinc-400">
                 Os convidados irão receber e-mails para confirmar a participação
                 na viagem.
               </p>
@@ -335,12 +340,13 @@ export function App() {
                     key={email}
                     className="py-1.5 px-2.5 rounded-md bg-zinc-800 flex items-center gap-2"
                   >
-                    <span className="text-zinc-300">{email}</span>
-                    <button type="button">
-                      <X
-                        onClick={() => removeEmailFromInvites(email)}
-                        className="size-4 text-zinc-400"
-                      />
+                    <span className="text-zinc-300 text-sm">{email}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeEmailFromInvites(email)}
+                      className="p-1 hover:bg-zinc-700 rounded transition-colors"
+                    >
+                      <X className="size-3 sm:size-4 text-zinc-400" />
                     </button>
                   </div>
                 );
@@ -351,24 +357,24 @@ export function App() {
 
             <form
               onSubmit={addNewEmailToInvite}
-              className="p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center gap-2"
+              className="p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
             >
               <div className="px-2 flex items-center flex-1 gap-2">
-                <AtSign className="text-zinc-400 size-5" />
+                <AtSign className="text-zinc-400 size-5 flex-shrink-0" />
                 <input
                   type="email"
                   name="email"
                   placeholder="Digite o email do convidado"
-                  className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+                  className="bg-transparent text-base sm:text-lg placeholder-zinc-400 outline-none flex-1 min-w-0"
                 />
               </div>
 
               <button
                 type="submit"
-                className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-lime-400"
+                className="bg-lime-300 text-lime-950 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-lime-400 transition-colors"
               >
                 Convidar
-                <Plus className="size-5" />
+                <Plus className="size-4 sm:size-5" />
               </button>
             </form>
           </div>

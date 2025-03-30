@@ -4,6 +4,28 @@
 
 * {
   min-width: 0;
+  -webkit-tap-highlight-color: transparent; /* Remove highlight ao tocar em elementos */
+}
+
+/* Melhorando scroll suave em dispositivos móveis */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Otimizando fonte e legibilidade para dispositivos móveis */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px; /* Ajustando tamanho base da fonte para melhor legibilidade */
+  }
+}
+
+/* Prevenindo zoom indesejado em inputs em iOS */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 @keyframes pulsingGradient {
