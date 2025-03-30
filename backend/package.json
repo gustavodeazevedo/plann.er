@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
+    "build": "tsc && cp .env ./dist/.env",
+    "start": "node dist/server.js",
+    "clean": "rm -rf dist"
   },
   "keywords": [],
   "author": "",
