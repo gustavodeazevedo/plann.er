@@ -1,0 +1,174 @@
+import { FormEvent, useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { api } from "../lib/axios";
+import { AtSign } from "lucide-react";
+
+interface Trip {
+  destination: string;
+  date: string;
+  organizer: {
+    name: string;
+    email: string;
+  };
+}
+
+interface Guest {
+  email: string;
+  confirmed: boolean;
+  confirmedAt?: string;
+}
+
+interface TripResponse {
+  trip: Trip;
+  guest: Guest | null;
+}
+
+export function TripInvite() {
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasConfirmed, setHasConfirmed] = useState(false);
+  const [email, setEmail] = useState("");
+  const [searchParams] = useSearchParams();
+  const { id } = useParams();
+
+  // Tenta pegar o email do localStorage ou da URL
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("@planner:guestEmail");
+    const urlEmail = searchParams.get("email");
+    if (urlEmail) {
+      setEmail(urlEmail);
+      localStorage.setItem("@planner:guestEmail", urlEmail);
+    } else if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    async function loadTrip() {
+      try {
+        const response = await api.get<TripResponse>(`/trips/${id}/public`, {
+          params: { email },
+        });
+        setTrip(response.data.trip);
+        if (response.data.guest?.confirmed) {
+          setHasConfirmed(true);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (id && email) {
+      loadTrip();
+    } else {
+      setIsLoading(false);
+    }
+  }, [id, email]);
+
+  async function handleConfirmParticipation(event: FormEvent) {
+    event.preventDefault();
+    if (!email) return;
+
+    try {
+      await api.post(`/trips/${id}/confirm`, { email });
+      setHasConfirmed(true);
+      localStorage.setItem("@planner:guestEmail", email);
+    } catch (error) {
+      alert("Erro ao confirmar participação. Tente novamente.");
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+        <div className="max-w-md w-full px-6 text-center">
+          <p className="text-zinc-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!trip) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+        <div className="max-w-md w-full px-6 text-center space-y-4">
+          <img src="/logo.svg" alt="plann.er" className="mx-auto" />
+          <div className="space-y-2">
+            <h2 className="text-zinc-300 text-lg font-medium">
+              Viagem não encontrada
+            </h2>
+            <p className="text-zinc-400">
+              O link que você acessou é inválido ou esta viagem não existe mais.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+      <div className="max-w-md w-full px-6 text-center space-y-10">
+        <div className="flex flex-col items-center gap-3">
+          <img src="/logo.svg" alt="plann.er" />
+          <h2 className="text-zinc-300 text-lg font-medium">
+            {hasConfirmed ? "Participação confirmada!" : "Convite para viagem"}
+          </h2>
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-zinc-900 p-6 rounded-lg space-y-4">
+            <div className="space-y-1">
+              <p className="text-zinc-400 text-sm">Organizador</p>
+              <p className="text-zinc-200 text-lg">{trip.organizer.name}</p>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-zinc-400 text-sm">Destino</p>
+              <p className="text-zinc-200 text-lg">{trip.destination}</p>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-zinc-400 text-sm">Data</p>
+              <p className="text-zinc-200 text-lg">{trip.date}</p>
+            </div>
+          </div>
+
+          {!hasConfirmed && (
+            <form onSubmit={handleConfirmParticipation} className="space-y-4">
+              {!email && (
+                <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
+                  <AtSign className="size-5 text-zinc-400" />
+                  <input
+                    required
+                    type="email"
+                    placeholder="Confirme seu e-mail"
+                    className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium hover:bg-lime-400"
+              >
+                Confirmar participação
+              </button>
+            </form>
+          )}
+        </div>
+
+        {hasConfirmed && (
+          <p className="text-zinc-400">
+            Sua participação foi confirmada! O organizador da viagem receberá
+            uma notificação.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
