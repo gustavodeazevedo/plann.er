@@ -2,9 +2,19 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
 import { router } from "./routes";
 
-dotenv.config();
+// Try to load .env from current directory first, then from dist directory
+if (fs.existsSync(path.join(process.cwd(), ".env"))) {
+  dotenv.config();
+} else if (fs.existsSync(path.join(process.cwd(), "dist", ".env"))) {
+  dotenv.config({ path: path.join(process.cwd(), "dist", ".env") });
+} else {
+  console.warn("No .env file found, using environment variables");
+  dotenv.config();
+}
 
 console.log("Ambiente:", process.env.NODE_ENV);
 console.log("JWT_SECRET no início do servidor:", process.env.JWT_SECRET);

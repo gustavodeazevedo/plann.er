@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon",
     "prebuild": "rimraf dist",
-    "build": "tsc && node -e \"require('fs').mkdirSync('dist', { recursive: true }); require('fs').copyFileSync('.env', 'dist/.env');\"",
+    "build": "tsc && node -e \"require('fs').mkdirSync('dist', { recursive: true }); if (require('fs').existsSync('.env')) { require('fs').copyFileSync('.env', 'dist/.env'); }\"",
     "start": "node dist/server.js",
     "clean": "rimraf dist"
   },
