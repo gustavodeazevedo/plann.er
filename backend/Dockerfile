@@ -5,8 +5,8 @@ WORKDIR /opt/render/project/src/backend
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies including production dependencies only
-RUN npm ci --only=production
+# Install dependencies including development dependencies for build
+RUN npm ci
 
 # Copy source files
 COPY . .

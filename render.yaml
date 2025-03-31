@@ -3,8 +3,8 @@ services:
     name: planner-backend
     env: node
     region: ohio
-    buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && node dist/server.js
+    buildCommand: cd backend && yarn install && yarn run build
+    startCommand: cd backend && yarn start
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
