@@ -22,9 +22,12 @@ console.log("JWT_SECRET no início do servidor:", process.env.JWT_SECRET);
 const app = express();
 const port = process.env.PORT || 3333;
 
+// Get CORS_ORIGIN from environment variable or use default origins
+const corsOrigin = process.env.CORS_ORIGIN || "https://plann-er.vercel.app";
 const allowedOrigins = [
   "http://localhost:5173",
   "https://plann-er-lake.vercel.app",
+  corsOrigin,
 ];
 
 app.use(
@@ -45,14 +48,28 @@ app.use(
 app.use(express.json());
 app.use(router);
 
-mongoose
-  .connect(process.env.MONGODB_URI!)
-  .then(() => {
-    console.log("Connected to MongoDB Atlas");
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
+// Improved error handling for MongoDB connection
+const startServer = () => {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
   });
+};
+
+// Try to connect to MongoDB
+if (!process.env.MONGODB_URI) {
+  console.error("MONGODB_URI is not defined in environment variables");
+  // Start server anyway to avoid deployment failures
+  startServer();
+} else {
+  mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => {
+      console.log("Connected to MongoDB Atlas");
+      startServer();
+    })
+    .catch((error) => {
+      console.error("Error connecting to MongoDB:", error);
+      // Start server anyway to avoid deployment failures
+      startServer();
+    });
+}
