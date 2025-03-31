@@ -5,6 +5,7 @@ services:
     region: ohio
     buildCommand: cd backend && yarn install && yarn run build
     startCommand: cd backend && yarn start
+    rootDirectory: backend
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
