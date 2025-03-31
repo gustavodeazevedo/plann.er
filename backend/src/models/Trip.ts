@@ -2,7 +2,11 @@ import mongoose, { Document } from "mongoose";
 
 interface Guest {
   name: string;
-  accessId: string; // UUID para acesso único
+  email?: string;
+  accessId: string;
+  confirmed?: boolean;
+  confirmedAt?: Date;
+  userId?: mongoose.Types.ObjectId;
   permissions: {
     canEdit: boolean;
     canInvite: boolean;
@@ -42,10 +46,20 @@ const tripSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        email: String,
         accessId: {
           type: String,
           required: true,
           unique: true,
+        },
+        confirmed: {
+          type: Boolean,
+          default: false,
+        },
+        confirmedAt: Date,
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
         },
         permissions: {
           canEdit: {

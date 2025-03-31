@@ -5,6 +5,45 @@ import { sendMail } from "../services/mail";
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
+// Extended Guest interface that includes both model and runtime properties
+interface Guest {
+  name: string;
+  accessId: string;
+  email?: string;
+  confirmed?: boolean;
+  confirmedAt?: Date;
+  userId?: mongoose.Types.ObjectId;
+  permissions: {
+    canEdit: boolean;
+    canInvite: boolean;
+  };
+}
+
+// Interface for collaborator
+interface Collaborator {
+  userId: {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+    email: string;
+  };
+  permissions: {
+    canEdit: boolean;
+    canInvite: boolean;
+  };
+}
+
+// Interface for the guest invitation payload
+interface GuestInvitation {
+  name: string;
+  email: string;
+}
+
+// Interface for organizer data
+interface Organizer {
+  name: string;
+  email: string;
+}
+
 export class TripController {
   async create(req: Request, res: Response) {
     try {
@@ -112,14 +151,14 @@ export class TripController {
   async sendInvitation(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { guests } = req.body; // Agora recebe um array de convidados com nome e email
+      const { guests }: { guests: GuestInvitation[] } = req.body;
 
       const trip = await Trip.findOne({
         $or: [
           { _id: id, user: req.userId },
           { _id: id, "collaborators.userId": req.userId },
         ],
-      }).populate("user", "name email");
+      }).populate<{ user: Organizer }>("user", "name email");
 
       if (!trip) {
         return res.status(404).json({ error: "Trip not found" });
@@ -151,17 +190,18 @@ export class TripController {
       }
 
       // Adicionar novos convidados
-      trip.guests.push(
-        ...newGuests.map((guest) => ({
-          name: guest.name,
-          email: guest.email,
-          confirmed: false,
-          permissions: {
-            canEdit: true,
-            canInvite: true,
-          },
-        }))
-      );
+      const newGuestData: Guest[] = newGuests.map((guest) => ({
+        name: guest.name,
+        email: guest.email,
+        accessId: uuidv4(),
+        confirmed: false,
+        permissions: {
+          canEdit: true,
+          canInvite: true,
+        },
+      }));
+
+      trip.guests.push(...newGuestData);
 
       await trip.save();
 
@@ -187,17 +227,20 @@ export class TripController {
   async showPublic(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { email } = req.query;
+      const { email } = req.query as { email?: string };
 
       const trip = await Trip.findById(id)
-        .populate("user", "name email")
-        .populate("collaborators.userId", "name email");
+        .populate<{ user: Organizer }>("user", "name email")
+        .populate<{ collaborators: Collaborator[] }>(
+          "collaborators.userId",
+          "name email"
+        );
 
       if (!trip) {
         return res.status(404).json({ error: "Trip not found" });
       }
 
-      const guest = trip.guests.find((g) => g.email === email);
+      const guest = email ? trip.guests.find((g) => g.email === email) : null;
       const isInvited = Boolean(guest);
 
       const tripData = {
@@ -205,9 +248,9 @@ export class TripController {
         date: trip.date,
         organizer: trip.user,
         collaborators: trip.collaborators.map((c) => ({
-          id: c.userId,
-          name: (c.userId as any).name,
-          email: (c.userId as any).email,
+          id: c.userId._id,
+          name: c.userId.name,
+          email: c.userId.email,
           permissions: c.permissions,
         })),
       };
@@ -217,6 +260,7 @@ export class TripController {
         guest: isInvited ? guest : null,
       });
     } catch (error) {
+      console.error("Error in showPublic:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -282,13 +326,13 @@ export class TripController {
   async addGuest(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { name } = req.body;
+      const { name, email } = req.body;
 
       const trip = await Trip.findOne({
         $or: [
           { _id: id, user: req.userId },
-          { _id: id, "collaborators.userId": req.userId }
-        ]
+          { _id: id, "collaborators.userId": req.userId },
+        ],
       });
 
       if (!trip) {
@@ -296,36 +340,49 @@ export class TripController {
       }
 
       // Verificar permissão para convidar
-      const collaborator = trip.collaborators.find(c => c.userId.toString() === req.userId);
-      if (trip.user.toString() !== req.userId && (!collaborator || !collaborator.permissions.canInvite)) {
-        return res.status(403).json({ error: "You don't have permission to invite users" });
+      const collaborator = trip.collaborators.find(
+        (c) => c.userId.toString() === req.userId
+      );
+      if (
+        trip.user.toString() !== req.userId &&
+        (!collaborator || !collaborator.permissions.canInvite)
+      ) {
+        return res
+          .status(403)
+          .json({ error: "You don't have permission to invite users" });
       }
 
       // Gerar UUID único para o convidado
       const accessId = uuidv4();
 
       // Adicionar novo convidado
-      trip.guests.push({
+      const newGuest: Guest = {
         name,
+        email,
         accessId,
+        confirmed: false,
         permissions: {
           canEdit: true,
-          canInvite: true
-        }
-      });
+          canInvite: true,
+        },
+      };
 
+      trip.guests.push(newGuest);
       await trip.save();
 
       // Gerar link de compartilhamento personalizado
-      const shareUrl = `${process.env.FRONTEND_URL}/trip/guest/${trip._id}/${accessId}?name=${encodeURIComponent(name)}`;
+      const shareUrl = `${process.env.FRONTEND_URL}/trip/guest/${
+        trip._id
+      }/${accessId}?name=${encodeURIComponent(name)}`;
 
       return res.json({
         message: "Guest added successfully",
         shareUrl,
         guest: {
           name,
-          accessId
-        }
+          accessId,
+          email,
+        },
       });
     } catch (error) {
       console.error("Error adding guest:", error);
@@ -345,7 +402,7 @@ export class TripController {
         return res.status(404).json({ error: "Trip not found" });
       }
 
-      const guest = trip.guests.find(g => g.accessId === accessId);
+      const guest = trip.guests.find((g) => g.accessId === accessId);
       if (!guest) {
         return res.status(404).json({ error: "Guest access not found" });
       }
@@ -356,7 +413,7 @@ export class TripController {
           date: trip.date,
           organizer: trip.user,
         },
-        guest
+        guest,
       });
     } catch (error) {
       return res.status(500).json({ error: "Internal server error" });

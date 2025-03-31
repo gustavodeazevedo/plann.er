@@ -92,7 +92,10 @@ export function App() {
     try {
       const trip = await handleSaveTrip(true);
       if (trip) {
-        const response = await api.post<ShareLink>(`/trips/${trip._id}/guests`, { name });
+        const response = await api.post<ShareLink>(
+          `/trips/${trip._id}/guests`,
+          { name }
+        );
         setShareLink(response.data);
         event.currentTarget.reset();
       }
@@ -253,7 +256,8 @@ export function App() {
           </div>
 
           <p className="text-xs sm:text-sm text-zinc-500">
-            Ao planejar sua viagem pela plann.er você automaticamente concorda com nossos{" "}
+            Ao planejar sua viagem pela plann.er você automaticamente concorda
+            com nossos{" "}
             <a className="text-zinc-300 underline" href="#">
               termos de uso
             </a>{" "}
@@ -283,7 +287,8 @@ export function App() {
               </div>
 
               <p className="text-xs sm:text-sm text-zinc-400">
-                Digite o nome do convidado para gerar um link de acesso personalizado.
+                Digite o nome do convidado para gerar um link de acesso
+                personalizado.
               </p>
             </div>
 
@@ -319,7 +324,9 @@ export function App() {
                     <p className="text-sm font-medium text-zinc-200">
                       {shareLink.guest.name}
                     </p>
-                    <p className="text-xs text-zinc-400">Link de acesso gerado</p>
+                    <p className="text-xs text-zinc-400">
+                      Link de acesso gerado
+                    </p>
                   </div>
                   <button
                     onClick={() => {

@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import bcrypt from "bcrypt";
+import * as argon2 from "argon2";
 
 export interface IUser extends Document {
   name: string;
@@ -47,8 +47,13 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    // Using argon2id variant which is the recommended choice for web applications
+    this.password = await argon2.hash(this.password, {
+      type: argon2.argon2id,
+      memoryCost: 65536, // 64 MiB
+      timeCost: 3, // 3 iterations
+      parallelism: 4, // 4 threads
+    });
     next();
   } catch (error) {
     return next(error as Error);
@@ -61,7 +66,7 @@ userSchema.methods.comparePassword = async function (
   try {
     const user = await User.findById(this._id).select("+password");
     if (!user) return false;
-    return bcrypt.compare(candidatePassword, user.password);
+    return argon2.verify(user.password, candidatePassword);
   } catch (error) {
     return false;
   }
