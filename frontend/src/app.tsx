@@ -4,7 +4,6 @@ import {
   LogOut,
   MapPin,
   Plus,
-  Save,
   Settings2,
   Share2,
   User,
@@ -13,6 +12,7 @@ import {
 import { FormEvent, useEffect, useState } from "react";
 import { api } from "./lib/axios";
 import { useNavigate } from "react-router-dom";
+import "./styles/app.css";
 
 interface Trip {
   _id: string;
@@ -140,20 +140,7 @@ export function App() {
       {user && (
         <div className="w-full">
           <div className="max-w-3xl mx-auto py-4 px-4 sm:px-6 text-center">
-            <span
-              className="text-xl sm:text-2xl font-medium"
-              style={{
-                background:
-                  "linear-gradient(90deg, #a3e635 10%, #ffffff 50%, #ADFF2F 90%)",
-                backgroundSize: "200% auto",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                display: "inline-block",
-                animation:
-                  "7s ease-in-out 0s infinite normal none running pulsingGradient",
-              }}
-            >
+            <span className="text-xl sm:text-2xl font-medium welcome-text">
               Olá, {user.name}
             </span>
           </div>
@@ -279,6 +266,7 @@ export function App() {
                   Adicionar convidado
                 </h2>
                 <button
+                  title="Voltar para página anterior"
                   onClick={closeGuestsModal}
                   className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
                 >
@@ -329,6 +317,7 @@ export function App() {
                     </p>
                   </div>
                   <button
+                    title="Copiar link de convite"
                     onClick={() => {
                       navigator.clipboard.writeText(shareLink.shareUrl);
                       alert("Link copiado!");

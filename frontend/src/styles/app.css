@@ -1,0 +1,21 @@
+.welcome-text {
+  background: linear-gradient(90deg, #a3e635 10%, #ffffff 50%, #adff2f 90%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  animation: 7s ease-in-out 0s infinite normal none running pulsingGradient;
+}
+
+@keyframes pulsingGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
