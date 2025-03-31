@@ -24,6 +24,10 @@ RUN echo "NODE_ENV=production" > .env \
 # Build the application
 RUN npm run build
 
+# Verify the build output
+RUN ls -la dist/
+RUN cat dist/server.js | head -n 5
+
 EXPOSE 3333
 
 CMD ["npm", "start"]
