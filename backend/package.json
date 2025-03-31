@@ -2,13 +2,14 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon",
     "prebuild": "rimraf dist",
     "build": "tsc && node -e \"require('fs').mkdirSync('dist', { recursive: true }); if (require('fs').existsSync('.env')) { require('fs').copyFileSync('.env', 'dist/.env'); } console.log('Build completed successfully!');\"",
     "start": "node dist/server.js",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "postinstall": "yarn build"
   },
   "keywords": [],
   "author": "",
