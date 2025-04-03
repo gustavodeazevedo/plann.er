@@ -11,8 +11,11 @@ import {
 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { api } from "./lib/axios";
+import { LocationAutocomplete } from "./components/LocationAutocomplete";
+import { DatePicker } from "./components/DatePicker";
 import { useNavigate } from "react-router-dom";
 import "./styles/app.css";
+import "./styles/datepicker.css";
 
 interface Trip {
   _id: string;
@@ -167,29 +170,18 @@ export function App() {
 
           <div className="space-y-3 sm:space-y-4">
             <div className="h-auto sm:h-16 bg-zinc-900 p-3 sm:px-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center shadow-shape gap-3">
-              <div className="flex items-center gap-2 flex-1">
-                <MapPin className="size-5 text-zinc-400 flex-shrink-0" />
-                <input
-                  disabled={isGuestsInputOpen}
-                  type="text"
-                  placeholder="Para onde você vai?"
-                  className="bg-transparent text-base sm:text-lg placeholder-zinc-400 outline-none flex-1 min-w-0"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                />
-              </div>
+              <LocationAutocomplete
+                disabled={isGuestsInputOpen}
+                value={destination}
+                onChange={setDestination}
+              />
 
-              <div className="flex items-center gap-2">
-                <Calendar className="size-5 text-zinc-400 flex-shrink-0" />
-                <input
-                  disabled={isGuestsInputOpen}
-                  type="text"
-                  placeholder="Quando?"
-                  className="bg-transparent text-base sm:text-lg placeholder-zinc-400 w-full sm:w-40 outline-none"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-              </div>
+              <DatePicker
+                disabled={isGuestsInputOpen}
+                value={date}
+                onChange={setDate}
+                className="w-full sm:w-40"
+              />
 
               <div className="hidden sm:block w-px h-6 bg-zinc-800" />
 

@@ -210,14 +210,16 @@ export function TripDetails() {
                   </div>
                 </div>
 
-                {canEdit && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="w-full bg-lime-300 text-lime-950 rounded-lg px-4 py-2 font-medium hover:bg-lime-400 transition-colors"
-                  >
-                    Editar viagem
-                  </button>
-                )}
+                <div className="flex items-center justify-between mt-6">
+                  {canEdit && (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="bg-lime-300 text-lime-950 rounded-lg px-4 py-2 font-medium hover:bg-lime-400 transition-colors"
+                    >
+                      Editar viagem
+                    </button>
+                  )}
+                </div>
               </>
             )}
           </div>
