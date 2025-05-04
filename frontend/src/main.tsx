@@ -9,6 +9,7 @@ import { ForgotPassword } from "./pages/ForgotPassword";
 import { ResetPassword } from "./pages/ResetPassword";
 import { TripInvite } from "./pages/TripInvite";
 import { TripDetails } from "./pages/TripDetails";
+import { TripSummary } from "./pages/TripSummary";
 import { GuestAccess } from "./pages/GuestAccess";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { NotificationProvider } from "./components/Notification/context";
@@ -37,6 +38,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 element={
                   <PrivateRoute>
                     <TripDetails />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/trip/:id/summary"
+                element={
+                  <PrivateRoute>
+                    <TripSummary />
                   </PrivateRoute>
                 }
               />

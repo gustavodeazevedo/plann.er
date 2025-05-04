@@ -7,6 +7,7 @@ import {
   Share2,
   User,
   X,
+  FileText,
 } from "lucide-react";
 import { FormEvent, useCallback } from "react";
 import { StarButton } from "./components/StarButton";
@@ -22,6 +23,7 @@ import { SyncStatus } from "./components/SyncStatus";
 import { useTripState } from "./hooks/useTripState";
 import { useGuests } from "./hooks/useGuests";
 import { useAuth } from "./hooks/useAuth";
+import { TicketUpload } from "./components/TicketUpload";
 
 interface ShareLink {
   shareUrl: string;
@@ -41,10 +43,13 @@ export function App() {
     createdTripId,
     isGuestsInputOpen,
     isTaskListOpen,
+    isTicketUploadOpen,
     openGuestsInput,
     closeGuestsInput,
     openTaskList,
     closeTaskList,
+    openTicketUpload,
+    closeTicketUpload,
     startNewTrip,
     handleSaveTrip,
     setIsEditing,
@@ -61,6 +66,7 @@ export function App() {
 
   const { user, handleLogout } = useAuth();
   const { showNotification } = useNotification();
+  const navigate = useNavigate();
 
   // Função para alternar o modo de edição de local/data
   const toggleEditMode = useCallback(() => {
@@ -209,9 +215,47 @@ export function App() {
 
                 <div className="hidden sm:block w-px h-6 bg-zinc-800" />
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <button
+                  onClick={openTicketUpload}
+                  className="bg-zinc-800 text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors"
+                >
+                  <FileText className="size-4 sm:size-5" />
+                  <span>Anexar passagem</span>
+                </button>
+              </div>
+            )}
+
+            {/* Seção 4: Upload de Passagem */}
+            {isGuestsInputOpen && isTicketUploadOpen && createdTripId && (
+              <div className="bg-zinc-900 p-4 rounded-xl shadow-shape">
+                <TicketUpload tripId={createdTripId} />
+
+                <div className="mt-6 flex justify-center">
                   <StarButton
-                    onClick={() => handleSaveTrip(false)}
+                    onClick={async () => {
+                      try {
+                        // Salvar a viagem como confirmada (não é mais rascunho)
+                        const trip = await handleSaveTrip(false);
+
+                        if (trip) {
+                          // Mostrar notificação de sucesso
+                          showNotification(
+                            "Viagem confirmada com sucesso!",
+                            "success"
+                          );
+
+                          // Redirecionar para a página de resumo da viagem
+                          navigate(`/trip/${createdTripId}/summary`);
+                        }
+                      } catch (error) {
+                        // Mostrar notificação de erro
+                        showNotification(
+                          "Erro ao confirmar viagem. Por favor, tente novamente.",
+                          "error"
+                        );
+                        console.error("Erro ao confirmar viagem:", error);
+                      }
+                    }}
                     disabled={isLoading}
                     className="flex items-center justify-center gap-2"
                   >
