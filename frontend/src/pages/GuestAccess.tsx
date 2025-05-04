@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/axios";
 import { Calendar, MapPin, User } from "lucide-react";
 
@@ -14,6 +14,8 @@ interface TripDetails {
 interface Guest {
   name: string;
   accessId: string;
+  email?: string;
+  confirmed?: boolean;
   permissions: {
     canEdit: boolean;
     canInvite: boolean;
@@ -31,7 +33,9 @@ export function GuestAccess() {
   const [isLoading, setIsLoading] = useState(true);
   const { id, accessId } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const guestName = searchParams.get("name");
+  const token = localStorage.getItem("@planner:token");
 
   useEffect(() => {
     async function loadTripAccess() {
@@ -41,8 +45,13 @@ export function GuestAccess() {
         );
         setTrip(response.data.trip);
         setGuest(response.data.guest);
+
+        // Se já estiver autenticado, redireciona para a página de detalhes padronizada
+        if (token) {
+          navigate(`/trip/${id}?accessId=${accessId}`);
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Erro ao carregar detalhes da viagem:", error);
       } finally {
         setIsLoading(false);
       }
@@ -53,7 +62,7 @@ export function GuestAccess() {
     } else {
       setIsLoading(false);
     }
-  }, [id, accessId]);
+  }, [id, accessId, token, navigate]);
 
   if (isLoading) {
     return (
@@ -126,6 +135,8 @@ export function GuestAccess() {
               <p className="text-zinc-200 text-lg">{trip.organizer.name}</p>
             </div>
           </div>
+
+          <div className="flex justify-center"></div>
         </div>
       </div>
     </div>

@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendMail } from "../services/mail";
 import { OAuth2Client } from "google-auth-library";
+import { authConfig, jwtSignOptions } from "../config/auth";
 
-const JWT_SECRET = process.env.JWT_SECRET || "default-secret";
 const GOOGLE_CLIENT_ID =
   "804681981965-p0i2u26uc2j5qj5pk8che46cidk3i0ik.apps.googleusercontent.com";
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -26,8 +26,16 @@ export class UserController {
         password,
       });
 
-      console.log("Generating token with JWT_SECRET:", JWT_SECRET);
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+      // Usamos o JWT_SECRET como uma string comum
+      // e jwtSignOptions para as opções de assinatura
+      const token = jwt.sign(
+        { id: user._id },
+        authConfig.JWT_SECRET,
+        jwtSignOptions
+      );
+
+      // Configurar cookie para autenticação
+      res.cookie("auth_token", token, authConfig.cookieOptions);
 
       return res.status(201).json({
         user: {
@@ -57,7 +65,16 @@ export class UserController {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+      // Usamos o JWT_SECRET como uma string comum
+      // e jwtSignOptions para as opções de assinatura
+      const token = jwt.sign(
+        { id: user._id },
+        authConfig.JWT_SECRET,
+        jwtSignOptions
+      );
+
+      // Configurar cookie para autenticação
+      res.cookie("auth_token", token, authConfig.cookieOptions);
 
       return res.json({
         user: {
@@ -192,7 +209,17 @@ export class UserController {
         await user.save();
       }
 
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+      // Usamos o JWT_SECRET como uma string comum
+      // e jwtSignOptions para as opções de assinatura
+      const token = jwt.sign(
+        { id: user._id },
+        authConfig.JWT_SECRET,
+        jwtSignOptions
+      );
+
+      // Configurar cookie para autenticação
+      res.cookie("auth_token", token, authConfig.cookieOptions);
+
       console.log("JWT token generated successfully");
 
       return res.json({

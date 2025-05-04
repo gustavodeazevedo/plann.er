@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { authConfig } from "../config/auth";
 
 interface TokenPayload {
   id: string;
@@ -7,32 +8,64 @@ interface TokenPayload {
   exp: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "default-secret";
-
 export function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const { authorization } = req.headers;
+  let token: string | undefined;
+  const authHeader = req.headers.authorization;
+  const isDevelopment = process.env.NODE_ENV !== "production";
 
-  if (!authorization) {
+  // Log para depuração (apenas em desenvolvimento)
+  if (isDevelopment) {
+    console.log(`Requisição para: ${req.method} ${req.path}`);
+    console.log(`Cabeçalho de autorização presente: ${!!authHeader}`);
+    console.log(`Cookies presentes: ${!!req.cookies}`);
+  }
+
+  // Verificar token no cookie (método preferencial)
+  if (req.cookies && req.cookies.auth_token) {
+    token = req.cookies.auth_token;
+    if (isDevelopment) console.log("Token encontrado em cookie");
+  }
+  // Verificar no cabeçalho de autorização (método legado)
+  else if (authHeader) {
+    const parts = authHeader.split(" ");
+
+    if (parts.length !== 2 || parts[0] !== "Bearer") {
+      return res.status(401).json({ error: "Token format invalid" });
+    }
+
+    token = parts[1];
+    if (isDevelopment)
+      console.log("Token encontrado no cabeçalho de autorização");
+
+    // Se o cabeçalho X-Migrate-Token estiver presente, migrar para cookie
+    if (req.headers["x-migrate-token"] === "true") {
+      if (isDevelopment) console.log("Migrando token para cookie");
+      res.cookie("auth_token", token, authConfig.cookieOptions);
+    }
+  }
+
+  if (!token) {
     return res.status(401).json({ error: "Token not provided" });
   }
 
-  const [, token] = authorization.split(" ");
+  if (!authConfig.JWT_SECRET) {
+    return res
+      .status(500)
+      .json({ error: "Server authentication configuration error" });
+  }
 
   try {
-    console.log("Using JWT_SECRET:", JWT_SECRET);
-    console.log("Token received:", token);
-
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
-    console.log("Token decoded successfully:", decoded);
-
+    const decoded = jwt.verify(token, authConfig.JWT_SECRET) as TokenPayload;
     req.userId = decoded.id;
+    if (isDevelopment) console.log(`Token válido para usuário: ${decoded.id}`);
     return next();
   } catch (err) {
+    // Evitar exposição de detalhes de erro
     console.error("Token verification error:", err);
-    return res.status(401).json({ error: "Invalid token" });
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
 }

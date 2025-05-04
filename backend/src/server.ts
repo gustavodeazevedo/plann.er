@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
+import cookieParser from "cookie-parser";
 import { router } from "./routes";
 
 // Try to load .env from current directory first, then from dist directory
@@ -16,8 +17,15 @@ if (fs.existsSync(path.join(process.cwd(), ".env"))) {
   dotenv.config();
 }
 
+// Verificar variáveis de ambiente críticas sem expor seus valores
+const requiredEnvVars = ["MONGODB_URI", "JWT_SECRET"];
+const missingEnvVars = requiredEnvVars.filter((env) => !process.env[env]);
+
+if (missingEnvVars.length > 0) {
+  console.warn(`Variáveis de ambiente faltando: ${missingEnvVars.join(", ")}`);
+}
+
 console.log("Ambiente:", process.env.NODE_ENV);
-console.log("JWT_SECRET no início do servidor:", process.env.JWT_SECRET);
 
 const app = express();
 const port = process.env.PORT || 3333;
@@ -46,6 +54,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser()); // Adicionando middleware de cookies
 app.use(router);
 
 // Improved error handling for MongoDB connection

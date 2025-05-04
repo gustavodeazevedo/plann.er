@@ -21,6 +21,10 @@ interface Guest {
   email: string;
   confirmed: boolean;
   confirmedAt?: string;
+  permissions?: {
+    canEdit: boolean;
+    canInvite: boolean;
+  };
 }
 
 interface TripResponse {
@@ -32,6 +36,7 @@ export function TripInvite() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasConfirmed, setHasConfirmed] = useState(false);
+  const [wantsToContribute, setWantsToContribute] = useState(false);
   const [searchParams] = useSearchParams();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -45,12 +50,15 @@ export function TripInvite() {
         const response = await api.get<TripResponse>(`/trips/${id}/public`, {
           params: { email },
         });
+
         setTrip(response.data.trip);
+
+        // Verificar se o convidado já confirmou a participação
         if (response.data.guest?.confirmed) {
           setHasConfirmed(true);
         }
       } catch (error) {
-        console.error(error);
+        console.error("Erro ao carregar detalhes da viagem:", error);
       } finally {
         setIsLoading(false);
       }
@@ -73,13 +81,19 @@ export function TripInvite() {
     if (!email) return;
 
     try {
-      await api.post(`/trips/${id}/confirm`, { email });
+      const response = await api.post(`/trips/${id}/confirm`, {
+        email,
+        wantsToContribute,
+      });
+
       setHasConfirmed(true);
       localStorage.setItem("@planner:guestEmail", email);
 
       // Redireciona para a página de login com os parâmetros necessários
       navigate(
-        `/login?redirect=/trip/${id}&email=${encodeURIComponent(email)}`
+        `/login?redirect=/trip/${id}&email=${encodeURIComponent(
+          email
+        )}&contribute=${wantsToContribute}`
       );
     } catch (error) {
       alert("Erro ao confirmar participação. Tente novamente.");
@@ -142,7 +156,7 @@ export function TripInvite() {
             </div>
           </div>
 
-          {!hasConfirmed && (
+          {!hasConfirmed ? (
             <form onSubmit={handleConfirmParticipation} className="space-y-4">
               {!email && (
                 <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
@@ -158,6 +172,20 @@ export function TripInvite() {
                 </div>
               )}
 
+              <div className="flex items-center space-x-2 bg-zinc-900 p-3 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="contribute"
+                  checked={wantsToContribute}
+                  onChange={(e) => setWantsToContribute(e.target.checked)}
+                  className="h-4 w-4 text-lime-600 focus:ring-lime-500 border-gray-300 rounded"
+                />
+                <label htmlFor="contribute" className="text-zinc-200 text-sm">
+                  Quero contribuir com esta viagem (editar datas, convidados,
+                  etc)
+                </label>
+              </div>
+
               <button
                 type="submit"
                 className="w-full bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium hover:bg-lime-400 transition-colors"
@@ -165,35 +193,33 @@ export function TripInvite() {
                 Confirmar participação
               </button>
             </form>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-zinc-400">
+                Sua participação foi confirmada! Para acessar os detalhes da
+                viagem, faça login ou crie uma conta.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Link
+                  to={`/login?redirect=/trip/${id}&email=${encodeURIComponent(
+                    email || ""
+                  )}&contribute=${wantsToContribute}`}
+                  className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium hover:bg-lime-400 transition-colors"
+                >
+                  Fazer login
+                </Link>
+                <Link
+                  to={`/register?redirect=/trip/${id}&email=${encodeURIComponent(
+                    email || ""
+                  )}&contribute=${wantsToContribute}`}
+                  className="bg-zinc-800 text-zinc-200 rounded-lg px-5 py-2 font-medium hover:bg-zinc-700 transition-colors"
+                >
+                  Criar conta
+                </Link>
+              </div>
+            </div>
           )}
         </div>
-
-        {hasConfirmed && (
-          <div className="space-y-4">
-            <p className="text-zinc-400">
-              Sua participação foi confirmada! Para acessar os detalhes da
-              viagem, faça login ou crie uma conta.
-            </p>
-            <div className="flex flex-col gap-2">
-              <Link
-                to={`/login?redirect=/trip/${id}&email=${encodeURIComponent(
-                  email || ""
-                )}`}
-                className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium hover:bg-lime-400 transition-colors"
-              >
-                Fazer login
-              </Link>
-              <Link
-                to={`/register?redirect=/trip/${id}&email=${encodeURIComponent(
-                  email || ""
-                )}`}
-                className="bg-zinc-800 text-zinc-200 rounded-lg px-5 py-2 font-medium hover:bg-zinc-700 transition-colors"
-              >
-                Criar conta
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,17 +1,26 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { AuthForm } from "../components/AuthForm";
 import { api } from "../lib/axios";
-import { AtSign, KeyRound } from "lucide-react";
+import { AtSign, KeyRound, AlertCircle } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { getSyncService } from "../lib/syncService";
 
 export function Login() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showSessionExpired, setShowSessionExpired] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const redirect = searchParams.get("redirect");
   const email = searchParams.get("email");
+  const expired = searchParams.get("expired");
+
+  useEffect(() => {
+    if (expired === "true") {
+      setShowSessionExpired(true);
+    }
+  }, [expired]);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,6 +43,12 @@ export function Login() {
 
       localStorage.setItem("@planner:token", response.data.token);
       localStorage.setItem("@planner:user", JSON.stringify(response.data.user));
+
+      // Atualizar o ID do usuário no serviço de sincronização
+      const syncService = getSyncService();
+      syncService.updateUserId(response.data.user.id);
+      // Inicializar o serviço de sincronização para processar ações pendentes
+      syncService.initialize(response.data.user.id);
 
       // Se o usuário veio de um convite e é o email correto, confirma a participação
       if (email && email === emailInput && redirect?.includes("/trip/")) {
@@ -61,6 +76,12 @@ export function Login() {
 
       localStorage.setItem("@planner:token", response.data.token);
       localStorage.setItem("@planner:user", JSON.stringify(response.data.user));
+
+      // Atualizar o ID do usuário no serviço de sincronização
+      const syncService = getSyncService();
+      syncService.updateUserId(response.data.user.id);
+      // Inicializar o serviço de sincronização para processar ações pendentes
+      syncService.initialize(response.data.user.id);
 
       // Se veio de um convite, confirma a participação
       if (email && redirect?.includes("/trip/")) {
@@ -106,6 +127,18 @@ export function Login() {
         </>
       }
     >
+      {showSessionExpired && (
+        <div className="mb-4 p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg flex items-start gap-3">
+          <AlertCircle className="size-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-amber-200 text-sm">
+              Sua sessão expirou. Por favor, faça login novamente para
+              continuar.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
           <AtSign className="size-5 text-zinc-400" />

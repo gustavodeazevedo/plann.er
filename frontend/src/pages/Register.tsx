@@ -1,57 +1,195 @@
 import { FormEvent, useState } from "react";
 import { AuthForm } from "../components/AuthForm";
 import { api } from "../lib/axios";
-import { AtSign, KeyRound, User } from "lucide-react";
+import { AtSign, KeyRound, User, Check } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  validateEmail,
+  validateName,
+  validatePassword,
+  validateForm,
+} from "../utils/validation";
+import { ErrorDisplay } from "../components/ErrorDisplay";
+import { LoadingIndicator } from "../components/LoadingIndicator";
+import { useErrorHandler } from "../utils/errorHandler";
+import { useNotification } from "../components/Notification/context";
 
 export function Register() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    passwordConfirmation: "",
+  });
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    passwordConfirmation?: string;
+  }>({});
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { handleError } = useErrorHandler();
+  const { showNotification } = useNotification();
 
   const redirect = searchParams.get("redirect");
-  const email = searchParams.get("email");
+  const emailParam = searchParams.get("email");
+
+  // Preencher o e-mail do convite se disponível
+  useState(() => {
+    if (emailParam) {
+      setFormData((prev) => ({ ...prev, email: emailParam }));
+    }
+  });
+
+  // Validar campo ao mudar
+  const validateField = (
+    field: "name" | "email" | "password" | "passwordConfirmation",
+    value: string
+  ) => {
+    let validationResult = { valid: true, message: "" };
+
+    switch (field) {
+      case "name":
+        validationResult = validateName(value);
+        break;
+      case "email":
+        validationResult = validateEmail(value);
+        break;
+      case "password":
+        validationResult = validatePassword(value);
+        break;
+      case "passwordConfirmation":
+        if (value !== formData.password) {
+          validationResult = {
+            valid: false,
+            message: "As senhas não conferem",
+          };
+        }
+        break;
+    }
+
+    if (!validationResult.valid) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [field]: validationResult.message,
+      }));
+      return false;
+    } else {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [field]: undefined,
+      }));
+      return true;
+    }
+  };
+
+  // Atualizar valores do formulário
+  const handleInputChange = (
+    field: "name" | "email" | "password" | "passwordConfirmation",
+    value: string
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    validateField(field, value);
+
+    // Se estamos alterando a senha principal, precisamos revalidar a confirmação
+    if (field === "password" && formData.passwordConfirmation) {
+      validateField("passwordConfirmation", formData.passwordConfirmation);
+    }
+  };
 
   async function handleRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
 
-    const formData = new FormData(event.currentTarget);
-    const name = formData.get("name")?.toString();
-    const emailInput = formData.get("email")?.toString();
-    const password = formData.get("password")?.toString();
+    // Validar todos os campos antes de enviar
+    const nameValidation = validateName(formData.name);
+    const emailValidation = validateEmail(formData.email);
+    const passwordValidation = validatePassword(formData.password);
 
-    if (!name || !emailInput || !password) {
-      alert("Preencha todos os campos");
+    // Validação da confirmação de senha
+    let passwordConfirmationValidation = { valid: true, message: "" };
+    if (formData.password !== formData.passwordConfirmation) {
+      passwordConfirmationValidation = {
+        valid: false,
+        message: "As senhas não conferem",
+      };
+      setFieldErrors((prev) => ({
+        ...prev,
+        passwordConfirmation: "As senhas não conferem",
+      }));
+    }
+
+    const formValidation = validateForm([
+      nameValidation,
+      emailValidation,
+      passwordValidation,
+      passwordConfirmationValidation,
+    ]);
+
+    if (!formValidation.valid) {
+      setError(
+        formValidation.message || "Por favor, corrija os erros no formulário"
+      );
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await api.post("/auth/register", {
-        name,
-        email: emailInput,
-        password,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
       });
 
       localStorage.setItem("@planner:token", response.data.token);
       localStorage.setItem("@planner:user", JSON.stringify(response.data.user));
 
+      // Inicializar o serviço de sincronização
+      const syncService = getSyncService();
+      syncService.updateUserId(response.data.user.id);
+      syncService.initialize(response.data.user.id);
+
       // Se o usuário veio de um convite e é o email correto, confirma a participação
-      if (email && email === emailInput && redirect?.includes("/trip/")) {
+      if (
+        emailParam &&
+        emailParam === formData.email &&
+        redirect?.includes("/trip/")
+      ) {
         const tripId = redirect.split("/trip/")[1].split("?")[0];
         try {
-          await api.post(`/trips/${tripId}/confirm`, { email: emailInput });
+          await api.post(`/trips/${tripId}/confirm`, { email: formData.email });
         } catch (error) {
-          console.error("Erro ao confirmar participação:", error);
+          handleError(error, {
+            context: "confirmar participação",
+            showNotification: true,
+          });
         }
       }
 
+      showNotification("Conta criada com sucesso!", "success");
       navigate(redirect || "/");
     } catch (error: any) {
       if (error.response?.data?.error === "User already exists") {
-        alert("Este e-mail já está cadastrado");
+        setError("Este e-mail já está cadastrado");
+        setFieldErrors((prev) => ({
+          ...prev,
+          email: "Este e-mail já está sendo usado por outra conta",
+        }));
       } else {
-        alert("Erro ao criar conta. Tente novamente.");
+        handleError(error, {
+          context: "criar conta",
+          fallbackMessage: "Erro ao criar conta. Tente novamente.",
+          showNotification: true,
+        });
+        setError("Erro ao criar conta. Tente novamente.");
       }
     } finally {
       setIsLoading(false);
@@ -63,12 +201,13 @@ export function Register() {
       title="Crie sua conta"
       submitText={isLoading ? "Criando conta..." : "Criar conta"}
       onSubmit={handleRegister}
+      isLoading={isLoading}
       footer={
         <>
           Já tem uma conta?{" "}
           <Link
             to={`/login${
-              redirect ? `?redirect=${redirect}&email=${email}` : ""
+              redirect ? `?redirect=${redirect}&email=${emailParam}` : ""
             }`}
             className="text-zinc-300 underline"
           >
@@ -78,38 +217,122 @@ export function Register() {
       }
     >
       <div className="space-y-4">
-        <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
-          <User className="size-5 text-zinc-400" />
-          <input
-            required
-            type="text"
-            name="name"
-            placeholder="Seu nome"
-            className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+        {error && (
+          <ErrorDisplay
+            message={error}
+            variant="error"
+            onDismiss={() => setError(null)}
           />
+        )}
+
+        <div className="space-y-1">
+          <div
+            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+              fieldErrors.name ? "border border-red-800" : ""
+            }`}
+          >
+            <User
+              className={`size-5 ${
+                fieldErrors.name ? "text-red-400" : "text-zinc-400"
+              }`}
+            />
+            <input
+              required
+              type="text"
+              name="name"
+              placeholder="Seu nome"
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+            />
+          </div>
+          {fieldErrors.name && (
+            <p className="text-xs text-red-400 px-2">{fieldErrors.name}</p>
+          )}
         </div>
 
-        <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
-          <AtSign className="size-5 text-zinc-400" />
-          <input
-            required
-            type="email"
-            name="email"
-            placeholder="Seu e-mail"
-            defaultValue={email || ""}
-            className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
-          />
+        <div className="space-y-1">
+          <div
+            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+              fieldErrors.email ? "border border-red-800" : ""
+            }`}
+          >
+            <AtSign
+              className={`size-5 ${
+                fieldErrors.email ? "text-red-400" : "text-zinc-400"
+              }`}
+            />
+            <input
+              required
+              type="email"
+              name="email"
+              placeholder="Seu e-mail"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+            />
+          </div>
+          {fieldErrors.email && (
+            <p className="text-xs text-red-400 px-2">{fieldErrors.email}</p>
+          )}
         </div>
 
-        <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
-          <KeyRound className="size-5 text-zinc-400" />
-          <input
-            required
-            type="password"
-            name="password"
-            placeholder="Sua senha"
-            className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
-          />
+        <div className="space-y-1">
+          <div
+            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+              fieldErrors.password ? "border border-red-800" : ""
+            }`}
+          >
+            <KeyRound
+              className={`size-5 ${
+                fieldErrors.password ? "text-red-400" : "text-zinc-400"
+              }`}
+            />
+            <input
+              required
+              type="password"
+              name="password"
+              placeholder="Sua senha"
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+            />
+          </div>
+          {fieldErrors.password && (
+            <p className="text-xs text-red-400 px-2">{fieldErrors.password}</p>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <div
+            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+              fieldErrors.passwordConfirmation ? "border border-red-800" : ""
+            }`}
+          >
+            <Check
+              className={`size-5 ${
+                fieldErrors.passwordConfirmation
+                  ? "text-red-400"
+                  : "text-zinc-400"
+              }`}
+            />
+            <input
+              required
+              type="password"
+              name="passwordConfirmation"
+              placeholder="Confirme sua senha"
+              value={formData.passwordConfirmation}
+              onChange={(e) =>
+                handleInputChange("passwordConfirmation", e.target.value)
+              }
+              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+            />
+          </div>
+          {fieldErrors.passwordConfirmation && (
+            <p className="text-xs text-red-400 px-2">
+              {fieldErrors.passwordConfirmation}
+            </p>
+          )}
         </div>
       </div>
     </AuthForm>
