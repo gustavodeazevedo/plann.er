@@ -2,12 +2,14 @@ import { Router } from "express";
 import { TripController } from "./controllers/TripController";
 import { UserController } from "./controllers/UserController";
 import { ChecklistController } from "./controllers/ChecklistController";
+import { TicketController, upload } from "./controllers/TicketController";
 import { authMiddleware } from "./middlewares/auth";
 
 const router = Router();
 const tripController = new TripController();
 const userController = new UserController();
 const checklistController = new ChecklistController();
+const ticketController = new TicketController();
 
 // Auth routes
 router.post("/auth/register", userController.register);
@@ -74,6 +76,25 @@ router.delete(
   "/trips/:id/tasks/:taskId",
   authMiddleware,
   tripController.deleteTask
+);
+
+// Rotas para gerenciamento de passagens
+router.post(
+  "/trips/:tripId/ticket",
+  authMiddleware,
+  upload.single("ticket"),
+  ticketController.uploadTicket
+);
+router.get("/trips/:tripId/ticket", authMiddleware, ticketController.getTicket);
+router.get(
+  "/trips/:tripId/ticket/download",
+  authMiddleware,
+  ticketController.downloadTicket
+);
+router.delete(
+  "/trips/:tripId/ticket",
+  authMiddleware,
+  ticketController.deleteTicket
 );
 
 export { router };
