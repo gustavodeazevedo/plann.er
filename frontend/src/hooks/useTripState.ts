@@ -26,6 +26,7 @@ export function useTripState() {
   const [createdTripId, setCreatedTripId] = useState<string | null>(null);
   const [isGuestsInputOpen, setIsGuestsInputOpen] = useState(false);
   const [isTaskListOpen, setIsTaskListOpen] = useState(false);
+  const [isTicketUploadOpen, setIsTicketUploadOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const { showNotification } = useNotification();
@@ -389,6 +390,14 @@ export function useTripState() {
     setIsTaskListOpen(false);
   }, []);
 
+  const openTicketUpload = useCallback(() => {
+    setIsTicketUploadOpen(true);
+  }, []);
+
+  const closeTicketUpload = useCallback(() => {
+    setIsTicketUploadOpen(false);
+  }, []);
+
   const startNewTrip = useCallback(() => {
     try {
       // Pergunta ao usuário se ele realmente quer iniciar uma nova viagem
@@ -517,6 +526,7 @@ export function useTripState() {
       createdTripId,
       isGuestsInputOpen,
       isTaskListOpen,
+      isTicketUploadOpen,
       isEditing,
       setIsEditing,
       user,
@@ -525,6 +535,8 @@ export function useTripState() {
       closeGuestsInput,
       openTaskList,
       closeTaskList,
+      openTicketUpload,
+      closeTicketUpload,
       startNewTrip,
       handleSaveTrip,
     };
@@ -535,12 +547,15 @@ export function useTripState() {
     createdTripId,
     isGuestsInputOpen,
     isTaskListOpen,
+    isTicketUploadOpen,
     isEditing,
     user,
     openGuestsInput,
     closeGuestsInput,
     openTaskList,
     closeTaskList,
+    openTicketUpload,
+    closeTicketUpload,
     startNewTrip,
     handleSaveTrip,
   ]);
