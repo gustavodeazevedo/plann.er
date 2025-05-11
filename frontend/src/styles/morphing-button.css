@@ -1,0 +1,63 @@
+/* Estilos para o botão de morphing */
+.morphing-button {
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.6s ease, transform 0.3s ease;
+}
+
+.morphing-button:hover {
+  transform: translateY(-2px);
+}
+
+.morphing-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(163, 230, 53, 0.5);
+}
+
+.morphing-button:active {
+  transform: scale(0.98);
+}
+
+.morphing-button .text-content {
+  transition: opacity 0.3s ease;
+}
+
+.morphing-button .check-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.6s ease, opacity 0.3s ease;
+}
+
+.morphing-button.morphing {
+  background-color: #22c55e !important; /* Cor verde de sucesso */
+  cursor: default;
+}
+
+.morphing-button.morphing .text-content {
+  opacity: 0;
+}
+
+.morphing-button.morphing .check-icon {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* Animação de pulse quando completa */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.morphing-button.morphing-complete {
+  animation: pulse 0.8s ease-out;
+}
