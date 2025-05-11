@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useNotification } from "./components/Notification/context";
 import "./styles/app.css";
 import "./styles/datepicker.css";
+import "./styles/morphing-button.css";
 import { StableTaskList } from "./components/StableTaskList";
 import { GuestList } from "./components/GuestList";
 import { SyncStatus } from "./components/SyncStatus";
@@ -24,6 +25,7 @@ import { useTripState } from "./hooks/useTripState";
 import { useGuests } from "./hooks/useGuests";
 import { useAuth } from "./hooks/useAuth";
 import { TicketUpload } from "./components/TicketUpload";
+import { MorphingButton } from "./components/MorphingButton";
 
 interface ShareLink {
   shareUrl: string;
@@ -188,13 +190,12 @@ export function App() {
                 <StableTaskList tripId={createdTripId} />
 
                 <div className="mt-6 flex justify-center">
-                  <button
+                  <MorphingButton
                     onClick={openGuestsInput}
-                    className="bg-lime-300 text-lime-950 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-lime-400 transition-colors"
+                    className="bg-lime-300 text-lime-950 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2"
                   >
                     Confirmar Itens
-                    <ArrowRight className="size-4 sm:size-5" />
-                  </button>
+                  </MorphingButton>
                 </div>
               </div>
             )}

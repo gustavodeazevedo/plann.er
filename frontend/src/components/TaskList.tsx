@@ -85,6 +85,12 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
     };
   }, [tripId]); // Apenas tripId como dependência
 
+  // Calcular o progresso das tarefas
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((task) => task.completed).length;
+  const progressPercentage =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
   // Adicionar nova tarefa
   function handleAddTask(e: FormEvent) {
     e.preventDefault();
@@ -201,15 +207,32 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
           </h3>
           <button
             onClick={fetchTasks}
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded-md transition-colors filter-button"
             title="Sincronizar tarefas"
           >
-            Sincronizar
+            Atualizar
           </button>
         </div>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-zinc-500 mt-1">
           Adicione itens que você não pode esquecer de levar
         </p>
+
+        {/* Barra de progresso */}
+        <div className="mt-3 mb-1">
+          <div className="flex justify-between text-xs text-zinc-400 mb-1">
+            <span>Progresso</span>
+            <span>
+              {completedTasks} de {totalTasks} concluídos ({progressPercentage}
+              %)
+            </span>
+          </div>
+          <div className="w-full bg-zinc-800 rounded-full h-2.5">
+            <div
+              className="bg-lime-500 h-2.5 rounded-full transition-all duration-500 progress-bar-fill"
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+          </div>
+        </div>
       </div>
 
       {/* Formulário para adicionar nova tarefa */}
@@ -225,6 +248,7 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
           onChange={(e) => setNewTaskDescription(e.target.value)}
           disabled={isLoading}
         />
+
         <button
           type="submit"
           className="bg-lime-500 hover:bg-lime-400 text-lime-950 rounded-md p-1.5 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed add-task-button"
@@ -256,9 +280,9 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
           tasks.map((task) => (
             <div
               key={task._id}
-              className={`flex items-center justify-between bg-zinc-800/50 p-3 rounded-lg border border-zinc-700/50 group task-item ${
-                task.completed ? "completed" : ""
-              }`}
+              className={`flex items-center justify-between bg-zinc-800/50 p-3 rounded-lg border-l-4 group task-item hover:bg-zinc-800 transition-all ${
+                task.completed ? "completed opacity-70" : ""
+              } border-zinc-700`}
             >
               <div className="flex items-center gap-3 flex-1">
                 <button
