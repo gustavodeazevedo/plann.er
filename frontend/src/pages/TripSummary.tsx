@@ -70,7 +70,7 @@ export function TripSummary() {
   const getFullTicketUrl = (url: string) => {
     // Verificar se a URL já é absoluta (começa com http:// ou https://)
     if (url.startsWith("http://") || url.startsWith("https://")) {
-      // URL já está completa (Supabase)
+      // URL já está completa (Cloudinary)
       return url;
     } else {
       // URL relativa, adicionar baseUrl (armazenamento local)
