@@ -1,7 +1,7 @@
-import { v2 as cloudinary } from 'cloudinary';
-import fs from 'fs';
-import path from 'path';
-import * as dotenv from 'dotenv';
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+import path from "path";
+import * as dotenv from "dotenv";
 
 // Carrega variáveis de ambiente
 if (fs.existsSync(path.join(process.cwd(), ".env"))) {
@@ -14,7 +14,7 @@ if (fs.existsSync(path.join(process.cwd(), ".env"))) {
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Verificar se as credenciais estão disponíveis
@@ -57,20 +57,20 @@ export async function uploadFile(
 
     // Remove a extensão do nome do arquivo para o public_id
     const fileNameWithoutExt = path.parse(fileName).name;
-    
+
     // Faz upload para o Cloudinary
     const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: 'raw', // Importante para PDFs
+      resource_type: "raw", // Importante para PDFs
       folder: `planner/tickets/${userId}/${tripId}`,
       public_id: fileNameWithoutExt,
       use_filename: true,
       unique_filename: true,
-      access_mode: 'public' // Para facilitar o acesso direto
+      access_mode: "public", // Para facilitar o acesso direto
     });
 
     return {
       url: result.secure_url,
-      publicId: result.public_id
+      publicId: result.public_id,
     };
   } catch (error) {
     console.error("Erro ao fazer upload para o Cloudinary:", error);
@@ -89,7 +89,7 @@ export async function deleteFile(publicId: string): Promise<void> {
 
   try {
     await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'raw' // Importante especificar para PDFs
+      resource_type: "raw", // Importante especificar para PDFs
     });
   } catch (error) {
     console.error("Erro ao excluir arquivo do Cloudinary:", error);
@@ -114,8 +114,8 @@ export async function getSignedUrl(
     // Para arquivos públicos, retornamos a URL direta
     // Se precisar de URLs com expiração, seria necessário implementar lógica adicional
     const url = cloudinary.url(publicId, {
-      resource_type: 'raw',
-      secure: true
+      resource_type: "raw",
+      secure: true,
     });
 
     return url;

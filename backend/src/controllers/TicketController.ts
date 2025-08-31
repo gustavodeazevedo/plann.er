@@ -171,6 +171,10 @@ export class TicketController {
           .json({ error: "Passagem não encontrada para esta viagem" });
       }
 
+      // Configurar headers para visualização de PDF
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${trip.ticketName || 'passagem.pdf'}"`);
+      
       // Redirecionar para a URL do Cloudinary
       return res.redirect(trip.ticketUrl);
     } catch (error) {
