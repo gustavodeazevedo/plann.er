@@ -12,7 +12,7 @@ import {
   Check,
   X,
   FileText,
-  ExternalLink,
+  Download,
 } from "lucide-react";
 import { useNotification } from "../components/Notification/context";
 import { LoadingIndicator } from "../components/LoadingIndicator";
@@ -250,10 +250,11 @@ export function TripSummary() {
                     const downloadUrl = `${api.defaults.baseURL}/trips/${id}/ticket/download`;
                     window.open(downloadUrl, "_blank", "noopener,noreferrer");
                   }}
-                  className="bg-zinc-700 hover:bg-zinc-600 p-2 rounded text-zinc-300 transition-colors"
-                  title="Visualizar passagem"
+                  className="bg-lime-500 hover:bg-lime-400 text-black px-4 py-2 rounded font-medium transition-colors flex items-center gap-2"
+                  title="Baixar passagem"
                 >
-                  <ExternalLink className="size-5" />
+                  <Download className="size-4" />
+                  Baixar PDF
                 </button>
               </div>
             </div>

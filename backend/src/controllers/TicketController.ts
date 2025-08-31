@@ -180,11 +180,11 @@ export class TicketController {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Configurar headers para PDF
+        // Configurar headers para download de PDF
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
           "Content-Disposition",
-          `inline; filename="${trip.ticketName || "passagem.pdf"}"`
+          `attachment; filename="${trip.ticketName || "passagem.pdf"}"`
         );
         res.setHeader('Cache-Control', 'public, max-age=31536000');
         
