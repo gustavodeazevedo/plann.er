@@ -82,7 +82,7 @@ router.delete(
 router.post(
   "/trips/:tripId/ticket",
   authMiddleware,
-  upload.single("ticket"),
+  upload.single("ticket") as any,
   ticketController.uploadTicket
 );
 router.get("/trips/:tripId/ticket", authMiddleware, ticketController.getTicket);
