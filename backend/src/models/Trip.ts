@@ -35,6 +35,9 @@ export interface ITrip extends Document {
       canInvite: boolean;
     };
   }[];
+  ticketUrl?: string;
+  ticketName?: string;
+  ticketStoragePath?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -131,6 +134,9 @@ const tripSchema = new mongoose.Schema(
         },
       },
     ],
+    ticketUrl: String,
+    ticketName: String,
+    ticketStoragePath: String,
   },
   {
     timestamps: true,

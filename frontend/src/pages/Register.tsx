@@ -8,11 +8,12 @@ import {
   validateName,
   validatePassword,
   validateForm,
+  ValidationResult
 } from "../utils/validation";
 import { ErrorDisplay } from "../components/ErrorDisplay";
-import { LoadingIndicator } from "../components/LoadingIndicator";
 import { useErrorHandler } from "../utils/errorHandler";
 import { useNotification } from "../components/Notification/context";
+import { getSyncService } from "../lib/syncService";
 
 export function Register() {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,13 +45,12 @@ export function Register() {
       setFormData((prev) => ({ ...prev, email: emailParam }));
     }
   });
-
   // Validar campo ao mudar
   const validateField = (
     field: "name" | "email" | "password" | "passwordConfirmation",
     value: string
   ) => {
-    let validationResult = { valid: true, message: "" };
+    let validationResult: ValidationResult = { valid: true };
 
     switch (field) {
       case "name":
@@ -137,10 +137,9 @@ export function Register() {
     if (!formValidation.valid) {
       setError(
         formValidation.message || "Por favor, corrija os erros no formulário"
-      );
-      return;
-    }
-
+      );      return;
+    }    
+    
     setIsLoading(true);
     try {
       const response = await api.post("/auth/register", {
@@ -148,14 +147,19 @@ export function Register() {
         email: formData.email,
         password: formData.password,
       });
-
+      
       localStorage.setItem("@planner:token", response.data.token);
       localStorage.setItem("@planner:user", JSON.stringify(response.data.user));
 
       // Inicializar o serviço de sincronização
-      const syncService = getSyncService();
-      syncService.updateUserId(response.data.user.id);
-      syncService.initialize(response.data.user.id);
+      try {
+        const syncService = getSyncService();
+        syncService.updateUserId(response.data.user.id);
+        syncService.initialize(response.data.user.id);
+      } catch (syncError) {
+        console.error("Erro ao inicializar serviço de sincronização:", syncError);
+        // Continuar mesmo se a sincronização falhar
+      }
 
       // Se o usuário veio de um convite e é o email correto, confirma a participação
       if (
@@ -169,15 +173,27 @@ export function Register() {
         } catch (error) {
           handleError(error, {
             context: "confirmar participação",
-            showNotification: true,
-          });
+            showNotification: true,          });
         }
       }
-
+      
       showNotification("Conta criada com sucesso!", "success");
       navigate(redirect || "/");
-    } catch (error: any) {
-      if (error.response?.data?.error === "User already exists") {
+    } catch (error: unknown) {
+      // Verificar se é um erro de usuário já existente
+      const isUserExistsError = 
+        error && 
+        typeof error === 'object' && 
+        'response' in error && 
+        error.response && 
+        typeof error.response === 'object' && 
+        'data' in error.response && 
+        error.response.data && 
+        typeof error.response.data === 'object' && 
+        'error' in error.response.data && 
+        error.response.data.error === "User already exists";
+      
+      if (isUserExistsError) {
         setError("Este e-mail já está cadastrado");
         setFieldErrors((prev) => ({
           ...prev,
@@ -195,13 +211,11 @@ export function Register() {
       setIsLoading(false);
     }
   }
-
   return (
     <AuthForm
       title="Crie sua conta"
       submitText={isLoading ? "Criando conta..." : "Criar conta"}
       onSubmit={handleRegister}
-      isLoading={isLoading}
       footer={
         <>
           Já tem uma conta?{" "}

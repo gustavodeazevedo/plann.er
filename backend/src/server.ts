@@ -55,6 +55,11 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser()); // Adicionando middleware de cookies
+
+// Configuração para servir arquivos estáticos da pasta uploads
+const uploadsPath = path.join(__dirname, "../uploads");
+app.use("/uploads", express.static(uploadsPath));
+
 app.use(router);
 
 // Improved error handling for MongoDB connection
