@@ -244,15 +244,17 @@ export function TripSummary() {
                     <p className="text-sm text-zinc-400">{ticketName}</p>
                   </div>
                 </div>
-                <a
-                  href={getFullTicketUrl(ticketUrl)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => {
+                    // Usar a URL de download do backend em vez da URL direta do Cloudinary
+                    const downloadUrl = `${api.defaults.baseURL}/trips/${id}/ticket/download`;
+                    window.open(downloadUrl, "_blank", "noopener,noreferrer");
+                  }}
                   className="bg-zinc-700 hover:bg-zinc-600 p-2 rounded text-zinc-300 transition-colors"
                   title="Visualizar passagem"
                 >
                   <ExternalLink className="size-5" />
-                </a>
+                </button>
               </div>
             </div>
           )}

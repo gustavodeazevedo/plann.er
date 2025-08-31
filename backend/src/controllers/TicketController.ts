@@ -171,12 +171,34 @@ export class TicketController {
           .json({ error: "Passagem não encontrada para esta viagem" });
       }
 
-      // Configurar headers para visualização de PDF
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename="${trip.ticketName || 'passagem.pdf'}"`);
-      
-      // Redirecionar para a URL do Cloudinary
-      return res.redirect(trip.ticketUrl);
+      try {
+        // Buscar o arquivo do Cloudinary e servir através do backend
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch(trip.ticketUrl);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Configurar headers para PDF
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+          "Content-Disposition",
+          `inline; filename="${trip.ticketName || "passagem.pdf"}"`
+        );
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+        
+        // Pipe o arquivo do Cloudinary para a resposta
+        if (response.body) {
+          response.body.pipe(res);
+        } else {
+          throw new Error('Response body is null');
+        }
+        
+      } catch (fetchError) {
+        console.error("Erro ao buscar arquivo do Cloudinary:", fetchError);
+        return res.status(500).json({ error: "Erro ao acessar o arquivo da passagem" });
+      }
     } catch (error) {
       console.error("Erro ao fazer download da passagem:", error);
       return res
