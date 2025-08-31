@@ -173,9 +173,9 @@ export class TicketController {
 
       try {
         // Buscar o arquivo do Cloudinary e servir através do backend
-        const fetch = (await import('node-fetch')).default;
+        const fetch = (await import("node-fetch")).default;
         const response = await fetch(trip.ticketUrl);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -186,18 +186,19 @@ export class TicketController {
           "Content-Disposition",
           `attachment; filename="${trip.ticketName || "passagem.pdf"}"`
         );
-        res.setHeader('Cache-Control', 'public, max-age=31536000');
-        
+        res.setHeader("Cache-Control", "public, max-age=31536000");
+
         // Pipe o arquivo do Cloudinary para a resposta
         if (response.body) {
           response.body.pipe(res);
         } else {
-          throw new Error('Response body is null');
+          throw new Error("Response body is null");
         }
-        
       } catch (fetchError) {
         console.error("Erro ao buscar arquivo do Cloudinary:", fetchError);
-        return res.status(500).json({ error: "Erro ao acessar o arquivo da passagem" });
+        return res
+          .status(500)
+          .json({ error: "Erro ao acessar o arquivo da passagem" });
       }
     } catch (error) {
       console.error("Erro ao fazer download da passagem:", error);
