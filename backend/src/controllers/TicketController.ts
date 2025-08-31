@@ -165,16 +165,26 @@ export class TicketController {
         return res.status(404).json({ error: "Viagem não encontrada" });
       }
 
-      if (!trip.ticketUrl || !trip.ticketStoragePath) {
+      if (!trip.ticketUrl) {
         return res
           .status(404)
           .json({ error: "Passagem não encontrada para esta viagem" });
       }
 
+      console.log("Tentando baixar passagem:", {
+        tripId,
+        ticketUrl: trip.ticketUrl,
+        ticketName: trip.ticketName,
+      });
+
       try {
         // Buscar o arquivo do Cloudinary e servir através do backend
+        console.log("Fazendo fetch da URL:", trip.ticketUrl);
         const fetch = (await import("node-fetch")).default;
         const response = await fetch(trip.ticketUrl);
+
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers.raw());
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
