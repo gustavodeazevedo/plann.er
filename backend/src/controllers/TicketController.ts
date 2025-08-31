@@ -175,41 +175,14 @@ export class TicketController {
         tripId,
         ticketUrl: trip.ticketUrl,
         ticketName: trip.ticketName,
+        ticketStoragePath: trip.ticketStoragePath,
       });
 
-      try {
-        // Buscar o arquivo do Cloudinary e servir através do backend
-        console.log("Fazendo fetch da URL:", trip.ticketUrl);
-        const fetch = (await import("node-fetch")).default;
-        const response = await fetch(trip.ticketUrl);
+      // Estratégia simples: redirecionar diretamente para o Cloudinary
+      console.log("Redirecionando para URL do Cloudinary:", trip.ticketUrl);
 
-        console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers.raw());
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Configurar headers para download de PDF
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="${trip.ticketName || "passagem.pdf"}"`
-        );
-        res.setHeader("Cache-Control", "public, max-age=31536000");
-
-        // Pipe o arquivo do Cloudinary para a resposta
-        if (response.body) {
-          response.body.pipe(res);
-        } else {
-          throw new Error("Response body is null");
-        }
-      } catch (fetchError) {
-        console.error("Erro ao buscar arquivo do Cloudinary:", fetchError);
-        return res
-          .status(500)
-          .json({ error: "Erro ao acessar o arquivo da passagem" });
-      }
+      // Redirecionar para a URL do Cloudinary - o navegador fará o download
+      return res.redirect(trip.ticketUrl);
     } catch (error) {
       console.error("Erro ao fazer download da passagem:", error);
       return res

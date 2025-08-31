@@ -111,11 +111,14 @@ export async function getSignedUrl(
   }
 
   try {
-    // Para arquivos públicos, retornamos a URL direta
-    // Se precisar de URLs com expiração, seria necessário implementar lógica adicional
+    // Gerar URL assinada para download seguro
+    const timestamp = Math.round(new Date().getTime() / 1000) + expiresIn;
+
     const url = cloudinary.url(publicId, {
       resource_type: "raw",
       secure: true,
+      sign_url: true,
+      expires_at: timestamp,
     });
 
     return url;
@@ -123,6 +126,21 @@ export async function getSignedUrl(
     console.error("Erro ao gerar URL do Cloudinary:", error);
     throw error;
   }
+}
+
+/**
+ * Função para obter URL direta do arquivo (mais simples)
+ * @param publicId - ID público do arquivo no Cloudinary
+ */
+export function getDirectUrl(publicId: string): string {
+  if (!isCloudinaryConfigured) {
+    throw new Error("Cloudinary Storage não está configurado");
+  }
+
+  return cloudinary.url(publicId, {
+    resource_type: "raw",
+    secure: true,
+  });
 }
 
 export { cloudinary };
