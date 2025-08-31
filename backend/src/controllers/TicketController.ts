@@ -3,7 +3,11 @@ import fs from "fs";
 import path from "path";
 import { Trip } from "../models/Trip";
 import multer from "multer";
-import { uploadFile, deleteFile, getSignedUrl } from "../services/storage";
+import {
+  uploadFile,
+  deleteFile,
+  getSignedUrl,
+} from "../services/cloudinaryStorage";
 
 // Configuração do Multer para armazenamento temporário de arquivos
 const storage = multer.diskStorage({
@@ -63,18 +67,12 @@ export class TicketController {
       const fileName = req.file.originalname;
 
       try {
-        // Definir caminho no Supabase Storage
-        // Usar userId para garantir que cada usuário tenha sua própria pasta
-        const storagePath = `${req.userId}/${tripId}/${path.basename(
-          tempFilePath
-        )}`;
-
-        // Fazer upload para o Supabase Storage
-        const fileUrl = await uploadFile(
+        // Fazer upload para o Cloudinary
+        const result = await uploadFile(
           tempFilePath,
-          "tickets",
-          storagePath,
-          "application/pdf"
+          req.userId!,
+          tripId,
+          fileName
         );
 
         // Remover o arquivo temporário após o upload
@@ -91,22 +89,18 @@ export class TicketController {
         }
 
         // Atualizar o documento da viagem com as referências ao arquivo
-        if (fileUrl) {
-          trip.ticketUrl = fileUrl;
-          trip.ticketStoragePath = storagePath;
-          trip.ticketName = fileName;
-          await trip.save();
+        trip.ticketUrl = result.url;
+        trip.ticketStoragePath = result.publicId;
+        trip.ticketName = fileName;
+        await trip.save();
 
-          return res.status(200).json({
-            message: "Passagem enviada com sucesso",
-            ticketUrl: fileUrl,
-            ticketName: fileName,
-          });
-        } else {
-          throw new Error("Falha ao gerar URL do arquivo");
-        }
+        return res.status(200).json({
+          message: "Passagem enviada com sucesso",
+          ticketUrl: result.url,
+          ticketName: fileName,
+        });
       } catch (error) {
-        // Se houver erro no upload para o Supabase, remover arquivo temporário
+        // Se houver erro no upload para o Cloudinary, remover arquivo temporário
         if (fs.existsSync(tempFilePath)) {
           fs.unlinkSync(tempFilePath);
         }
@@ -177,10 +171,7 @@ export class TicketController {
           .json({ error: "Passagem não encontrada para esta viagem" });
       }
 
-      // Opcionalmente podemos gerar uma URL assinada com prazo mais curto
-      // const url = await getSignedUrl(trip.ticketStoragePath);
-
-      // Como já temos uma URL pública, podemos redirecionar diretamente
+      // Redirecionar para a URL do Cloudinary
       return res.redirect(trip.ticketUrl);
     } catch (error) {
       console.error("Erro ao fazer download da passagem:", error);
@@ -210,7 +201,7 @@ export class TicketController {
           .json({ error: "Passagem não encontrada para esta viagem" });
       }
 
-      // Excluir o arquivo do Supabase Storage
+      // Excluir o arquivo do Cloudinary
       await deleteFile(trip.ticketStoragePath);
 
       // Remover a referência do arquivo no documento da viagem
