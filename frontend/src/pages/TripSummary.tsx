@@ -13,10 +13,12 @@ import {
   X,
   FileText,
   Download,
+  Upload,
 } from "lucide-react";
 import { useNotification } from "../components/Notification/context";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ErrorDisplay } from "../components/ErrorDisplay";
+import { TicketUpload } from "../components/TicketUpload";
 import { useErrorHandler } from "../utils/errorHandler";
 
 interface TripDetails {
@@ -58,6 +60,7 @@ export function TripSummary() {
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(true);
   const [ticketUrl, setTicketUrl] = useState<string | null>(null);
   const [ticketName, setTicketName] = useState<string | null>(null);
+  const [isTicketUploadOpen, setIsTicketUploadOpen] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const { showNotification } = useNotification();
@@ -232,7 +235,7 @@ export function TripSummary() {
             </div>
           </div>
 
-          {ticketUrl && ticketName && (
+          {ticketUrl && ticketName ? (
             <div className="mt-4 border-t border-zinc-800 pt-4">
               <div className="bg-zinc-800 rounded-lg p-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -255,6 +258,30 @@ export function TripSummary() {
                 >
                   <Download className="size-4" />
                   Baixar PDF
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 border-t border-zinc-800 pt-4">
+              <div className="bg-zinc-800 rounded-lg p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-zinc-500/20 p-2 rounded-lg">
+                    <FileText className="size-5 text-zinc-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-zinc-400">Passagem Aérea</p>
+                    <p className="text-sm text-zinc-500">
+                      Nenhuma passagem anexada
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsTicketUploadOpen(true)}
+                  className="bg-lime-500 hover:bg-lime-400 text-black px-4 py-2 rounded font-medium transition-colors flex items-center gap-2"
+                  title="Anexar passagem"
+                >
+                  <Upload className="size-4" />
+                  Anexar PDF
                 </button>
               </div>
             </div>
@@ -376,6 +403,22 @@ export function TripSummary() {
           </div>
         )}
       </div>
+
+      {/* Modal de upload de passagem */}
+      {isTicketUploadOpen && id && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-zinc-900 rounded-xl p-6 w-full max-w-md relative">
+            <button
+              onClick={() => setIsTicketUploadOpen(false)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-white"
+              title="Fechar"
+            >
+              <X className="size-5" />
+            </button>
+            <TicketUpload tripId={id} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
