@@ -29,6 +29,11 @@ export function authMiddleware(
     token = req.cookies.auth_token;
     if (isDevelopment) console.log("Token encontrado em cookie");
   }
+  // Verificar no query parameter (para downloads via window.open)
+  else if (req.query.token && typeof req.query.token === "string") {
+    token = req.query.token;
+    if (isDevelopment) console.log("Token encontrado em query parameter");
+  }
   // Verificar no cabeçalho de autorização (método legado)
   else if (authHeader) {
     const parts = authHeader.split(" ");

@@ -248,59 +248,25 @@ export function TripSummary() {
                   </div>
                 </div>
                 <button
-                  onClick={async () => {
-                    try {
-                      // Verificar se o token existe
-                      const token = localStorage.getItem("@planner:token");
-                      console.log("Token encontrado:", token ? "Sim" : "Não");
+                  onClick={() => {
+                    // Verificar se o token existe
+                    const token = localStorage.getItem("@planner:token");
+                    console.log("Token encontrado:", token ? "Sim" : "Não");
 
-                      if (!token) {
-                        alert(
-                          "Você precisa estar logado para baixar a passagem. Redirecionando para login..."
-                        );
-                        navigate("/login");
-                        return;
-                      }
-
-                      // Usar a URL de download do backend em vez da URL direta do Cloudinary
-                      const downloadUrl = `${api.defaults.baseURL}/trips/${id}/ticket/download`;
-                      console.log("Tentando baixar de:", downloadUrl);
-
-                      // Fazer a requisição com o token de autenticação explícito
-                      const response = await api.get(
-                        `/trips/${id}/ticket/download`,
-                        {
-                          responseType: "blob",
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                          },
-                        }
+                    if (!token) {
+                      alert(
+                        "Você precisa estar logado para baixar a passagem. Redirecionando para login..."
                       );
-
-                      // Criar URL do blob e fazer download
-                      const blob = new Blob([response.data], {
-                        type: "application/pdf",
-                      });
-                      const url = window.URL.createObjectURL(blob);
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = ticketName || "passagem.pdf";
-                      document.body.appendChild(link);
-                      link.click();
-                      link.remove();
-                      window.URL.revokeObjectURL(url);
-                    } catch (error: any) {
-                      console.error("Erro ao baixar passagem:", error);
-                      if (error.response?.status === 401) {
-                        alert("Sessão expirada. Redirecionando para login...");
-                        localStorage.removeItem("@planner:token");
-                        navigate("/login");
-                      } else {
-                        alert(
-                          "Erro ao baixar passagem. Verifique o console para mais detalhes."
-                        );
-                      }
+                      navigate("/login");
+                      return;
                     }
+
+                    // Usar window.open com a URL do backend que fará o redirect
+                    const downloadUrl = `${api.defaults.baseURL}/trips/${id}/ticket/download?token=${token}`;
+                    console.log("Abrindo URL de download:", downloadUrl);
+
+                    // Abrir em nova aba para download - o backend fará redirect para Cloudinary
+                    window.open(downloadUrl, "_blank", "noopener,noreferrer");
                   }}
                   className="bg-lime-500 hover:bg-lime-400 text-black px-4 py-2 rounded font-medium transition-colors flex items-center gap-2"
                   title="Baixar passagem"
