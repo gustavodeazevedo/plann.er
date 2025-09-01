@@ -178,10 +178,23 @@ export class TicketController {
         ticketStoragePath: trip.ticketStoragePath,
       });
 
-      // Estratégia simples: redirecionar diretamente para o Cloudinary
-      console.log("Redirecionando para URL do Cloudinary:", trip.ticketUrl);
+      // Gerar URL assinada que sempre funciona
+      if (trip.ticketStoragePath) {
+        const { getSignedUrl } = await import("../services/cloudinaryStorage");
+        try {
+          const signedUrl = await getSignedUrl(trip.ticketStoragePath, 3600); // 1 hora
+          console.log("URL assinada gerada:", signedUrl);
+          return res.redirect(signedUrl);
+        } catch (signedError) {
+          console.error("Erro ao gerar URL assinada:", signedError);
+        }
+      }
 
-      // Redirecionar para a URL do Cloudinary - o navegador fará o download
+      // Fallback: usar a URL armazenada
+      console.log(
+        "Fallback: redirecionando para URL armazenada:",
+        trip.ticketUrl
+      );
       return res.redirect(trip.ticketUrl);
     } catch (error) {
       console.error("Erro ao fazer download da passagem:", error);
