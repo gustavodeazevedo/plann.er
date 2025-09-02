@@ -24,7 +24,7 @@ Plann.er é uma aplicação web para planejamento de viagens que permite aos usu
 - JWT para autenticação
 - Cookies HttpOnly para sessões seguras
 - SendGrid para envio de emails
-- Cloudinary para armazenamento de arquivos em PDF
+- Vercel Blob para armazenamento de arquivos em PDF
 - Multer para upload de arquivos
 
 ### Frontend
@@ -43,7 +43,7 @@ Plann.er é uma aplicação web para planejamento de viagens que permite aos usu
 - Conta no [Render](https://render.com/)
 - Conta no [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - Conta no [SendGrid](https://sendgrid.com/) para envio de emails
-- Conta no [Cloudinary](https://cloudinary.com/) para armazenamento de arquivos
+- Conta no [Vercel](https://vercel.com/) para armazenamento de arquivos (Vercel Blob)
 
 ### Variáveis de Ambiente
 
@@ -57,9 +57,7 @@ Configure as seguintes variáveis de ambiente no dashboard do Render:
 - `SENDGRID_FROM_EMAIL`: Email verificado no SendGrid
 - `CORS_ORIGIN`: URL do frontend (ex: `https://plann-er.vercel.app`)
 - `FRONTEND_URL`: URL do frontend (ex: `https://plann-er.vercel.app`)
-- `CLOUDINARY_CLOUD_NAME`: Nome da nuvem do Cloudinary
-- `CLOUDINARY_API_KEY`: Chave de API do Cloudinary
-- `CLOUDINARY_API_SECRET`: Chave secreta do Cloudinary
+- `BLOB_READ_WRITE_TOKEN`: Token de acesso ao Vercel Blob para armazenamento de arquivos
 
 ### Deploy Backend (Render)
 
@@ -142,7 +140,7 @@ O sistema utiliza:
 ### Gerenciamento de Passagens
 
 - Upload de arquivos PDF
-- Armazenamento seguro no Cloudinary
+- Armazenamento seguro no Vercel Blob
 - Visualização online
 - Download
 

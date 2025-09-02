@@ -73,7 +73,7 @@ export function TripSummary() {
   const getFullTicketUrl = (url: string) => {
     // Verificar se a URL já é absoluta (começa com http:// ou https://)
     if (url.startsWith("http://") || url.startsWith("https://")) {
-      // URL já está completa (Cloudinary)
+      // URL já está completa (Vercel Blob)
       return url;
     } else {
       // URL relativa, adicionar baseUrl (armazenamento local)
@@ -265,7 +265,7 @@ export function TripSummary() {
                     const downloadUrl = `${api.defaults.baseURL}/trips/${id}/ticket/download?token=${token}`;
                     console.log("Abrindo URL de download:", downloadUrl);
 
-                    // Abrir em nova aba para download - o backend fará redirect para Cloudinary
+                    // Abrir em nova aba para download - o backend fará redirect para Vercel Blob
                     window.open(downloadUrl, "_blank", "noopener,noreferrer");
                   }}
                   className="bg-lime-500 hover:bg-lime-400 text-black px-4 py-2 rounded font-medium transition-colors flex items-center gap-2"

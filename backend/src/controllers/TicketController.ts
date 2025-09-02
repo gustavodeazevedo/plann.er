@@ -6,8 +6,8 @@ import multer from "multer";
 import {
   uploadFile,
   deleteFile,
-  getSignedUrl,
-} from "../services/cloudinaryStorage";
+  getDownloadUrl,
+} from "../services/vercelBlobStorage";
 
 // Configuração do Multer para armazenamento temporário de arquivos
 const storage = multer.diskStorage({
@@ -67,7 +67,7 @@ export class TicketController {
       const fileName = req.file.originalname;
 
       try {
-        // Fazer upload para o Cloudinary
+        // Fazer upload para o Vercel Blob
         const result = await uploadFile(
           tempFilePath,
           req.userId!,
@@ -79,9 +79,9 @@ export class TicketController {
         fs.unlinkSync(tempFilePath);
 
         // Se já existia uma passagem anterior, excluir
-        if (trip.ticketUrl && trip.ticketStoragePath) {
+        if (trip.ticketUrl) {
           try {
-            await deleteFile(trip.ticketStoragePath);
+            await deleteFile(trip.ticketUrl);
           } catch (deleteError) {
             console.error("Erro ao excluir passagem antiga:", deleteError);
             // Continuamos mesmo se houver erro ao excluir a versão antiga
@@ -90,7 +90,7 @@ export class TicketController {
 
         // Atualizar o documento da viagem com as referências ao arquivo
         trip.ticketUrl = result.url;
-        trip.ticketStoragePath = result.publicId;
+        trip.ticketStoragePath = result.pathname;
         trip.ticketName = fileName;
         await trip.save();
 
@@ -100,7 +100,7 @@ export class TicketController {
           ticketName: fileName,
         });
       } catch (error) {
-        // Se houver erro no upload para o Cloudinary, remover arquivo temporário
+        // Se houver erro no upload para o Vercel Blob, remover arquivo temporário
         if (fs.existsSync(tempFilePath)) {
           fs.unlinkSync(tempFilePath);
         }
@@ -178,24 +178,14 @@ export class TicketController {
         ticketStoragePath: trip.ticketStoragePath,
       });
 
-      // Gerar URL assinada que sempre funciona
-      if (trip.ticketStoragePath) {
-        const { getSignedUrl } = await import("../services/cloudinaryStorage");
-        try {
-          const signedUrl = await getSignedUrl(trip.ticketStoragePath, 3600); // 1 hora
-          console.log("URL assinada gerada:", signedUrl);
-          return res.redirect(signedUrl);
-        } catch (signedError) {
-          console.error("Erro ao gerar URL assinada:", signedError);
-        }
+      // Para arquivos do Vercel Blob, usar a URL diretamente
+      if (trip.ticketUrl) {
+        console.log("Redirecionando para URL do Vercel Blob:", trip.ticketUrl);
+        return res.redirect(trip.ticketUrl);
       }
 
-      // Fallback: usar a URL armazenada
-      console.log(
-        "Fallback: redirecionando para URL armazenada:",
-        trip.ticketUrl
-      );
-      return res.redirect(trip.ticketUrl);
+      // Se não há URL, retornar erro
+      return res.status(404).json({ error: "URL da passagem não encontrada" });
     } catch (error) {
       console.error("Erro ao fazer download da passagem:", error);
       return res
@@ -224,7 +214,7 @@ export class TicketController {
           .json({ error: "Passagem não encontrada para esta viagem" });
       }
 
-      // Excluir o arquivo do Cloudinary
+      // Excluir o arquivo do Vercel Blob
       await deleteFile(trip.ticketStoragePath);
 
       // Remover a referência do arquivo no documento da viagem
