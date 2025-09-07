@@ -15,7 +15,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sendgrid/mail": "^8.1.4",
     "@types/cookie-parser": "^1.4.8",
     "@types/uuid": "^10.0.0",
     "@vercel/blob": "^1.1.1",
@@ -29,6 +28,7 @@
     "mongoose": "^8.2.3",
     "multer": "^2.0.1",
     "node-fetch": "^3.3.2",
+    "resend": "^6.0.2",
     "typescript": "^5.4.3",
     "uuid": "^11.1.0"
   },

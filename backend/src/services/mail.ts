@@ -1,16 +1,16 @@
-import sgMail from "@sendgrid/mail";
+import { Resend } from "resend";
 
-// Configuração do SendGrid será feita apenas quando o serviço for usado
-let isInitialized = false;
+// Configuração do Resend será feita apenas quando o serviço for usado
+let resend: Resend | null = null;
 
-function initializeSendGrid() {
-  if (!isInitialized) {
-    if (!process.env.SENDGRID_API_KEY) {
-      throw new Error("SENDGRID_API_KEY is not defined");
+function initializeResend() {
+  if (!resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY is not defined");
     }
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    isInitialized = true;
+    resend = new Resend(process.env.RESEND_API_KEY);
   }
+  return resend;
 }
 
 interface SendMailProps {
@@ -22,17 +22,23 @@ interface SendMailProps {
 
 export async function sendMail({ to, subject, text, html }: SendMailProps) {
   try {
-    initializeSendGrid();
+    const resendClient = initializeResend();
 
-    const msg = {
-      to,
-      from: process.env.SENDGRID_FROM_EMAIL || "planner.contato@outlook.com.br",
+    const { data, error } = await resendClient.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "planner@resend.dev",
+      to: [to],
       subject,
       text,
       html,
-    };
+    });
 
-    await sgMail.send(msg);
+    if (error) {
+      console.error("Error sending email:", error);
+      throw new Error(`Failed to send email: ${error.message}`);
+    }
+
+    console.log("Email sent successfully:", data?.id);
+    return data;
   } catch (error) {
     console.error("Error sending email:", error);
     throw new Error("Failed to send email");

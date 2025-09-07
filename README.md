@@ -29,7 +29,7 @@ Plann.er é uma aplicação web para planejamento de viagens que permite aos usu
 - Google OAuth para login social
 - OpenCage API para geocodificação de destinos
 - Cookies HttpOnly para sessões seguras
-- SendGrid para envio de emails
+- Resend para envio de emails
 - Vercel Blob para armazenamento de arquivos em PDF
 - Multer para upload de arquivos
 
