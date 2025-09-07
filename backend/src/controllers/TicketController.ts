@@ -178,10 +178,39 @@ export class TicketController {
         ticketStoragePath: trip.ticketStoragePath,
       });
 
-      // Para arquivos do Vercel Blob, usar a URL diretamente
+      // Para arquivos do Vercel Blob, fazer download programático
       if (trip.ticketUrl) {
-        console.log("Redirecionando para URL do Vercel Blob:", trip.ticketUrl);
-        return res.redirect(trip.ticketUrl);
+        console.log("Fazendo download do arquivo:", trip.ticketUrl);
+
+        try {
+          // Fazer fetch da URL do Vercel Blob
+          const fetch = (await import("node-fetch")).default;
+          const response = await fetch(trip.ticketUrl);
+
+          if (!response.ok) {
+            throw new Error(`Erro ao buscar arquivo: ${response.statusText}`);
+          }
+
+          // Definir headers para forçar download
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${trip.ticketName || "passagem.pdf"}"`
+          );
+          res.setHeader("Cache-Control", "no-cache");
+
+          // Stream do arquivo para o cliente
+          if (response.body) {
+            response.body.pipe(res);
+            return;
+          } else {
+            throw new Error("Corpo da resposta vazio");
+          }
+        } catch (fetchError) {
+          console.error("Erro ao fazer fetch do arquivo:", fetchError);
+          // Fallback: redirecionar para URL original
+          return res.redirect(trip.ticketUrl);
+        }
       }
 
       // Se não há URL, retornar erro

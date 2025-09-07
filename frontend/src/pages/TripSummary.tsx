@@ -248,7 +248,7 @@ export function TripSummary() {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     // Verificar se o token existe
                     const token = localStorage.getItem("@planner:token");
                     console.log("Token encontrado:", token ? "Sim" : "Não");
@@ -261,12 +261,28 @@ export function TripSummary() {
                       return;
                     }
 
-                    // Usar window.open com a URL do backend que fará o redirect
-                    const downloadUrl = `${api.defaults.baseURL}/trips/${id}/ticket/download?token=${token}`;
-                    console.log("Abrindo URL de download:", downloadUrl);
+                    try {
+                      // Fazer requisição para o backend com headers de autenticação
+                      const downloadUrl = `${api.defaults.baseURL}/trips/${id}/ticket/download`;
+                      console.log("Fazendo download do arquivo:", downloadUrl);
 
-                    // Abrir em nova aba para download - o backend fará redirect para Vercel Blob
-                    window.open(downloadUrl, "_blank", "noopener,noreferrer");
+                      // Criar um link temporário para download
+                      const link = document.createElement("a");
+                      link.href = `${downloadUrl}?token=${token}`;
+                      link.setAttribute(
+                        "download",
+                        trip.ticketName || "passagem.pdf"
+                      );
+                      link.style.display = "none";
+
+                      // Adicionar ao DOM, clicar e remover
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    } catch (error) {
+                      console.error("Erro ao baixar passagem:", error);
+                      alert("Erro ao baixar a passagem. Tente novamente.");
+                    }
                   }}
                   className="bg-lime-500 hover:bg-lime-400 text-black px-4 py-2 rounded font-medium transition-colors flex items-center gap-2"
                   title="Baixar passagem"
