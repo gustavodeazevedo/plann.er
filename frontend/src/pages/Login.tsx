@@ -70,6 +70,7 @@ export function Login() {
   }
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
+    setIsLoading(true);
     try {
       const response = await api.post("/auth/google", {
         credential: credentialResponse.credential,
@@ -101,6 +102,8 @@ export function Login() {
         error.response?.data || error.message
       );
       alert("Erro ao fazer login com Google. Tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
