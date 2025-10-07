@@ -8,12 +8,13 @@ import {
   validateName,
   validatePassword,
   validateForm,
-  ValidationResult
+  ValidationResult,
 } from "../utils/validation";
 import { ErrorDisplay } from "../components/ErrorDisplay";
 import { useErrorHandler } from "../utils/errorHandler";
 import { useNotification } from "../components/Notification/context";
 import { getSyncService } from "../lib/syncService";
+import { AuthLoadingOverlay } from "../components/AuthLoadingOverlay";
 
 export function Register() {
   const [isLoading, setIsLoading] = useState(false);
@@ -137,9 +138,10 @@ export function Register() {
     if (!formValidation.valid) {
       setError(
         formValidation.message || "Por favor, corrija os erros no formulário"
-      );      return;
-    }    
-    
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await api.post("/auth/register", {
@@ -147,7 +149,7 @@ export function Register() {
         email: formData.email,
         password: formData.password,
       });
-      
+
       localStorage.setItem("@planner:token", response.data.token);
       localStorage.setItem("@planner:user", JSON.stringify(response.data.user));
 
@@ -157,7 +159,10 @@ export function Register() {
         syncService.updateUserId(response.data.user.id);
         syncService.initialize(response.data.user.id);
       } catch (syncError) {
-        console.error("Erro ao inicializar serviço de sincronização:", syncError);
+        console.error(
+          "Erro ao inicializar serviço de sincronização:",
+          syncError
+        );
         // Continuar mesmo se a sincronização falhar
       }
 
@@ -173,26 +178,27 @@ export function Register() {
         } catch (error) {
           handleError(error, {
             context: "confirmar participação",
-            showNotification: true,          });
+            showNotification: true,
+          });
         }
       }
-      
+
       showNotification("Conta criada com sucesso!", "success");
       navigate(redirect || "/");
     } catch (error: unknown) {
       // Verificar se é um erro de usuário já existente
-      const isUserExistsError = 
-        error && 
-        typeof error === 'object' && 
-        'response' in error && 
-        error.response && 
-        typeof error.response === 'object' && 
-        'data' in error.response && 
-        error.response.data && 
-        typeof error.response.data === 'object' && 
-        'error' in error.response.data && 
+      const isUserExistsError =
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "error" in error.response.data &&
         error.response.data.error === "User already exists";
-      
+
       if (isUserExistsError) {
         setError("Este e-mail já está cadastrado");
         setFieldErrors((prev) => ({
@@ -212,143 +218,148 @@ export function Register() {
     }
   }
   return (
-    <AuthForm
-      title="Crie sua conta"
-      submitText={isLoading ? "Criando conta..." : "Criar conta"}
-      onSubmit={handleRegister}
-      footer={
-        <>
-          Já tem uma conta?{" "}
-          <Link
-            to={`/login${
-              redirect ? `?redirect=${redirect}&email=${emailParam}` : ""
-            }`}
-            className="text-zinc-300 underline"
-          >
-            Fazer login
-          </Link>
-        </>
-      }
-    >
-      <div className="space-y-4">
-        {error && (
-          <ErrorDisplay
-            message={error}
-            variant="error"
-            onDismiss={() => setError(null)}
-          />
-        )}
-
-        <div className="space-y-1">
-          <div
-            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
-              fieldErrors.name ? "border border-red-800" : ""
-            }`}
-          >
-            <User
-              className={`size-5 ${
-                fieldErrors.name ? "text-red-400" : "text-zinc-400"
+    <>
+      <AuthLoadingOverlay isLoading={isLoading} type="register" />
+      <AuthForm
+        title="Crie sua conta"
+        submitText={isLoading ? "Criando conta..." : "Criar conta"}
+        onSubmit={handleRegister}
+        footer={
+          <>
+            Já tem uma conta?{" "}
+            <Link
+              to={`/login${
+                redirect ? `?redirect=${redirect}&email=${emailParam}` : ""
               }`}
+              className="text-zinc-300 underline"
+            >
+              Fazer login
+            </Link>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          {error && (
+            <ErrorDisplay
+              message={error}
+              variant="error"
+              onDismiss={() => setError(null)}
             />
-            <input
-              required
-              type="text"
-              name="name"
-              placeholder="Seu nome"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
-            />
-          </div>
-          {fieldErrors.name && (
-            <p className="text-xs text-red-400 px-2">{fieldErrors.name}</p>
           )}
-        </div>
 
-        <div className="space-y-1">
-          <div
-            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
-              fieldErrors.email ? "border border-red-800" : ""
-            }`}
-          >
-            <AtSign
-              className={`size-5 ${
-                fieldErrors.email ? "text-red-400" : "text-zinc-400"
+          <div className="space-y-1">
+            <div
+              className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+                fieldErrors.name ? "border border-red-800" : ""
               }`}
-            />
-            <input
-              required
-              type="email"
-              name="email"
-              placeholder="Seu e-mail"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
-            />
+            >
+              <User
+                className={`size-5 ${
+                  fieldErrors.name ? "text-red-400" : "text-zinc-400"
+                }`}
+              />
+              <input
+                required
+                type="text"
+                name="name"
+                placeholder="Seu nome"
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+              />
+            </div>
+            {fieldErrors.name && (
+              <p className="text-xs text-red-400 px-2">{fieldErrors.name}</p>
+            )}
           </div>
-          {fieldErrors.email && (
-            <p className="text-xs text-red-400 px-2">{fieldErrors.email}</p>
-          )}
-        </div>
 
-        <div className="space-y-1">
-          <div
-            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
-              fieldErrors.password ? "border border-red-800" : ""
-            }`}
-          >
-            <KeyRound
-              className={`size-5 ${
-                fieldErrors.password ? "text-red-400" : "text-zinc-400"
+          <div className="space-y-1">
+            <div
+              className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+                fieldErrors.email ? "border border-red-800" : ""
               }`}
-            />
-            <input
-              required
-              type="password"
-              name="password"
-              placeholder="Sua senha"
-              value={formData.password}
-              onChange={(e) => handleInputChange("password", e.target.value)}
-              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
-            />
+            >
+              <AtSign
+                className={`size-5 ${
+                  fieldErrors.email ? "text-red-400" : "text-zinc-400"
+                }`}
+              />
+              <input
+                required
+                type="email"
+                name="email"
+                placeholder="Seu e-mail"
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+              />
+            </div>
+            {fieldErrors.email && (
+              <p className="text-xs text-red-400 px-2">{fieldErrors.email}</p>
+            )}
           </div>
-          {fieldErrors.password && (
-            <p className="text-xs text-red-400 px-2">{fieldErrors.password}</p>
-          )}
-        </div>
 
-        <div className="space-y-1">
-          <div
-            className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
-              fieldErrors.passwordConfirmation ? "border border-red-800" : ""
-            }`}
-          >
-            <Check
-              className={`size-5 ${
-                fieldErrors.passwordConfirmation
-                  ? "text-red-400"
-                  : "text-zinc-400"
+          <div className="space-y-1">
+            <div
+              className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+                fieldErrors.password ? "border border-red-800" : ""
               }`}
-            />
-            <input
-              required
-              type="password"
-              name="passwordConfirmation"
-              placeholder="Confirme sua senha"
-              value={formData.passwordConfirmation}
-              onChange={(e) =>
-                handleInputChange("passwordConfirmation", e.target.value)
-              }
-              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
-            />
+            >
+              <KeyRound
+                className={`size-5 ${
+                  fieldErrors.password ? "text-red-400" : "text-zinc-400"
+                }`}
+              />
+              <input
+                required
+                type="password"
+                name="password"
+                placeholder="Sua senha"
+                value={formData.password}
+                onChange={(e) => handleInputChange("password", e.target.value)}
+                className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+              />
+            </div>
+            {fieldErrors.password && (
+              <p className="text-xs text-red-400 px-2">
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
-          {fieldErrors.passwordConfirmation && (
-            <p className="text-xs text-red-400 px-2">
-              {fieldErrors.passwordConfirmation}
-            </p>
-          )}
+
+          <div className="space-y-1">
+            <div
+              className={`h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape ${
+                fieldErrors.passwordConfirmation ? "border border-red-800" : ""
+              }`}
+            >
+              <Check
+                className={`size-5 ${
+                  fieldErrors.passwordConfirmation
+                    ? "text-red-400"
+                    : "text-zinc-400"
+                }`}
+              />
+              <input
+                required
+                type="password"
+                name="passwordConfirmation"
+                placeholder="Confirme sua senha"
+                value={formData.passwordConfirmation}
+                onChange={(e) =>
+                  handleInputChange("passwordConfirmation", e.target.value)
+                }
+                className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+              />
+            </div>
+            {fieldErrors.passwordConfirmation && (
+              <p className="text-xs text-red-400 px-2">
+                {fieldErrors.passwordConfirmation}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
-    </AuthForm>
+      </AuthForm>
+    </>
   );
 }

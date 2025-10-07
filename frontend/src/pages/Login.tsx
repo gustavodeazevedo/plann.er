@@ -5,6 +5,7 @@ import { AtSign, KeyRound, AlertCircle } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { getSyncService } from "../lib/syncService";
+import { AuthLoadingOverlay } from "../components/AuthLoadingOverlay";
 
 export function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -109,79 +110,82 @@ export function Login() {
   };
 
   return (
-    <AuthForm
-      title="Entre na sua conta"
-      submitText={isLoading ? "Entrando..." : "Entrar"}
-      onSubmit={handleLogin}
-      footer={
-        <>
-          Ainda não tem uma conta?{" "}
-          <Link
-            to={`/register${
-              redirect ? `?redirect=${redirect}&email=${email}` : ""
-            }`}
-            className="text-zinc-300 underline"
-          >
-            Criar conta
-          </Link>
-        </>
-      }
-    >
-      {showSessionExpired && (
-        <div className="mb-4 p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg flex items-start gap-3">
-          <AlertCircle className="size-5 text-amber-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-amber-200 text-sm">
-              Sua sessão expirou. Por favor, faça login novamente para
-              continuar.
-            </p>
+    <>
+      <AuthLoadingOverlay isLoading={isLoading} type="login" />
+      <AuthForm
+        title="Entre na sua conta"
+        submitText={isLoading ? "Entrando..." : "Entrar"}
+        onSubmit={handleLogin}
+        footer={
+          <>
+            Ainda não tem uma conta?{" "}
+            <Link
+              to={`/register${
+                redirect ? `?redirect=${redirect}&email=${email}` : ""
+              }`}
+              className="text-zinc-300 underline"
+            >
+              Criar conta
+            </Link>
+          </>
+        }
+      >
+        {showSessionExpired && (
+          <div className="mb-4 p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg flex items-start gap-3">
+            <AlertCircle className="size-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-200 text-sm">
+                Sua sessão expirou. Por favor, faça login novamente para
+                continuar.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="space-y-4">
-        <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
-          <AtSign className="size-5 text-zinc-400" />
-          <input
-            required
-            type="email"
-            name="email"
-            placeholder="Seu e-mail"
-            defaultValue={email || ""}
-            className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
-          />
-        </div>
-
-        <div className="space-y-2">
+        <div className="space-y-4">
           <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
-            <KeyRound className="size-5 text-zinc-400" />
+            <AtSign className="size-5 text-zinc-400" />
             <input
               required
-              type="password"
-              name="password"
-              placeholder="Sua senha"
+              type="email"
+              name="email"
+              placeholder="Seu e-mail"
+              defaultValue={email || ""}
               className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
             />
           </div>
-          <Link
-            to={`/forgot-password${redirect ? `?redirect=${redirect}` : ""}`}
-            className="block text-right text-sm text-zinc-300 hover:underline"
-          >
-            Esqueceu a senha?
-          </Link>
-        </div>
 
-        <div className="flex justify-center mt-4">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            theme="filled_black"
-            text="signin_with"
-            shape="rectangular"
-            locale="pt_BR"
-          />
+          <div className="space-y-2">
+            <div className="h-12 bg-zinc-900 px-4 rounded-lg flex items-center gap-3 shadow-shape">
+              <KeyRound className="size-5 text-zinc-400" />
+              <input
+                required
+                type="password"
+                name="password"
+                placeholder="Sua senha"
+                className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+              />
+            </div>
+            <Link
+              to={`/forgot-password${redirect ? `?redirect=${redirect}` : ""}`}
+              className="block text-right text-sm text-zinc-300 hover:underline"
+            >
+              Esqueceu a senha?
+            </Link>
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="filled_black"
+              text="signin_with"
+              shape="rectangular"
+              locale="pt_BR"
+            />
+          </div>
         </div>
-      </div>
-    </AuthForm>
+      </AuthForm>
+    </>
   );
 }
