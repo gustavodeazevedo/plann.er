@@ -11,6 +11,11 @@ const userController = new UserController();
 const checklistController = new ChecklistController();
 const ticketController = new TicketController();
 
+// Health check route (para warm-up do servidor)
+router.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // Auth routes
 router.post("/auth/register", userController.register);
 router.post("/auth/login", userController.login);
