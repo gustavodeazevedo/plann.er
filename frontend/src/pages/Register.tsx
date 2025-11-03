@@ -15,6 +15,7 @@ import { useErrorHandler } from "../utils/errorHandler";
 import { useNotification } from "../components/Notification/context";
 import { getSyncService } from "../lib/syncService";
 import { AuthLoadingOverlay } from "../components/AuthLoadingOverlay";
+import { loginWithWarmup } from "../utils/serverWarmup";
 
 export function Register() {
   const [isLoading, setIsLoading] = useState(false);
@@ -144,10 +145,13 @@ export function Register() {
 
     setIsLoading(true);
     try {
-      const response = await api.post("/auth/register", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
+      // Usar loginWithWarmup para melhor lidar com cold starts
+      const response = await loginWithWarmup(async () => {
+        return await api.post("/auth/register", {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
       });
 
       localStorage.setItem("@planner:token", response.data.token);
