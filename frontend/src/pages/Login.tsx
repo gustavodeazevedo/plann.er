@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { getSyncService } from "../lib/syncService";
 import { AuthLoadingOverlay } from "../components/AuthLoadingOverlay";
+import { loginWithWarmup } from "../utils/serverWarmup";
 
 export function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -37,9 +38,12 @@ export function Login() {
 
     setIsLoading(true);
     try {
-      const response = await api.post("/auth/login", {
-        email: emailInput,
-        password,
+      // Usar loginWithWarmup para melhor lidar com cold starts
+      const response = await loginWithWarmup(async () => {
+        return await api.post("/auth/login", {
+          email: emailInput,
+          password,
+        });
       });
 
       localStorage.setItem("@planner:token", response.data.token);
@@ -69,11 +73,18 @@ export function Login() {
     }
   }
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (credentialResponse: {
+    credential?: string;
+  }) => {
+    if (!credentialResponse.credential) return;
+
     setIsLoading(true);
     try {
-      const response = await api.post("/auth/google", {
-        credential: credentialResponse.credential,
+      // Usar loginWithWarmup para melhor lidar com cold starts
+      const response = await loginWithWarmup(async () => {
+        return await api.post("/auth/google", {
+          credential: credentialResponse.credential,
+        });
       });
 
       localStorage.setItem("@planner:token", response.data.token);
@@ -96,10 +107,11 @@ export function Login() {
       }
 
       navigate(redirect || "/");
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { data?: unknown }; message?: string };
       console.error(
         "Error in Google login:",
-        error.response?.data || error.message
+        err.response?.data || err.message
       );
       alert("Erro ao fazer login com Google. Tente novamente.");
     } finally {
