@@ -257,7 +257,7 @@ export function LocationAutocomplete({
     return (
       <div
         ref={suggestionsRef}
-        className="absolute z-10 mt-1 w-full bg-zinc-800 rounded-lg shadow-lg max-h-60 overflow-auto"
+        className="absolute z-10 mt-1 w-full bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-h-60 overflow-auto border border-zinc-200 dark:border-zinc-700"
         role="listbox"
         id="location-suggestions"
       >
@@ -265,7 +265,7 @@ export function LocationAutocomplete({
           {suggestions.map((suggestion) => (
             <li
               key={suggestion.id}
-              className="px-4 py-2 hover:bg-zinc-700 cursor-pointer text-zinc-200 text-sm"
+              className="px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-900 dark:text-zinc-200 text-sm"
               onClick={() => handleSelectSuggestion(suggestion)}
               role="option"
             >
@@ -284,12 +284,12 @@ export function LocationAutocomplete({
           disabled ? "opacity-70" : ""
         }`}
       >
-        <MapPin className="size-5 text-zinc-400 flex-shrink-0" />
+        <MapPin className="size-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
         <input
           ref={inputRef}
           type="text"
           placeholder={placeholder}
-          className={`bg-transparent text-base sm:text-lg placeholder-zinc-400 outline-none flex-1 min-w-0 ${className}`}
+          className={`bg-transparent text-base sm:text-lg text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 outline-none flex-1 min-w-0 ${className}`}
           value={value}
           onChange={handleInputChange}
           onFocus={() => setIsFocused(true)}
@@ -301,7 +301,7 @@ export function LocationAutocomplete({
           aria-haspopup="listbox"
         />
         {isLoading && (
-          <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
+          <Loader2 className="w-4 h-4 text-zinc-500 dark:text-zinc-400 animate-spin" />
         )}
       </div>
 

@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import useLocalStorage from "../hooks/useLocalStorage";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -10,70 +9,69 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  // Detectar inicialmente o tema do sistema como fallback
-  const getInitialTheme = (): Theme => {
-    try {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme === "light" || savedTheme === "dark") {
-        return savedTheme;
-      }
+interface ThemeProviderProps {
+  children: ReactNode;
+}
 
-      // Se não tiver tema salvo, verifica preferência do sistema
-      if (
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
-        return "dark";
-      }
-
-      return "light";
-    } catch (error) {
-      console.error("Erro ao detectar tema inicial:", error);
-      return "light"; // Tema padrão em caso de erro
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem("theme");
+    console.log("🎨 Tema armazenado:", stored);
+    if (stored === "light" || stored === "dark") {
+      return stored;
     }
-  };
+    // PADRÃO: light
+    return "light";
+  });
 
-  const [theme, setTheme] = useLocalStorage<Theme>("theme", getInitialTheme());
   const [isThemeReady, setIsThemeReady] = useState(false);
 
-  // Aplica o tema ao elemento HTML root
   useEffect(() => {
     try {
-      const root = window.document.documentElement;
-
-      // Remove classes anteriores
+      const root = document.documentElement;
+      console.log("🎨 Aplicando tema:", theme);
+      
+      // Remove ambas as classes
       root.classList.remove("light", "dark");
-
-      // Adiciona a classe de tema atual
+      
+      // Adiciona a classe do tema atual
       root.classList.add(theme);
-
+      
+      // Salva no localStorage
+      localStorage.setItem("theme", theme);
+      
+      console.log("✅ Classes do HTML:", root.className);
       setIsThemeReady(true);
     } catch (error) {
-      console.error("Erro ao aplicar tema:", error);
-      setIsThemeReady(true); // Continua a renderização mesmo com erro
+      console.error("❌ Erro ao aplicar tema:", error);
+      setIsThemeReady(true);
     }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+    console.log("🔄 Toggle tema de:", theme);
+    setTheme((prev) => {
+      const newTheme = prev === "light" ? "dark" : "light";
+      console.log("➡️ Novo tema:", newTheme);
+      return newTheme;
+    });
   };
 
-  // Renderizar o conteúdo mesmo que o tema ainda não esteja pronto
+  if (!isThemeReady) {
+    return null;
+  }
+
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
-export const useTheme = (): ThemeContextType => {
+export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    // Fornecer um valor padrão em vez de lançar um erro
-    return { theme: "light", toggleTheme: () => {} };
+    throw new Error("useTheme deve ser usado dentro de ThemeProvider");
   }
   return context;
-};
+}

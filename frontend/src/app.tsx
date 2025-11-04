@@ -26,6 +26,7 @@ import { useGuests } from "./hooks/useGuests";
 import { useAuth } from "./hooks/useAuth";
 import { TicketUpload } from "./components/TicketUpload";
 import { MorphingButton } from "./components/MorphingButton";
+import { ThemeToggle } from "./components/ThemeToggle";
 
 interface ShareLink {
   shareUrl: string;
@@ -90,18 +91,18 @@ export function App() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-pattern bg-no-repeat bg-center">
+    <div className="min-h-screen flex flex-col bg-pattern bg-no-repeat bg-center bg-zinc-50 dark:bg-zinc-950">
       {user && (
         <div className="w-full">
           <div className="max-w-3xl mx-auto py-4 px-4 sm:px-6 text-center">
             <div className="flex justify-between items-center">
-              <span className="text-xl sm:text-2xl font-medium welcome-text">
+              <span className="text-xl sm:text-2xl font-medium welcome-text text-zinc-900 dark:text-zinc-100">
                 Olá, {user.name}
               </span>
               {createdTripId && (
                 <button
                   onClick={startNewTrip}
-                  className="text-sm text-zinc-400 hover:text-zinc-300 transition-colors"
+                  className="text-sm text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors"
                 >
                   Iniciar nova viagem
                 </button>
@@ -116,22 +117,25 @@ export function App() {
           <div className="flex flex-col items-center gap-3">
             <div className="w-full flex items-center justify-between">
               <img src="/logo.svg" alt="plann.er" className="w-32 sm:w-auto" />
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors"
-              >
-                <LogOut className="size-4 sm:size-5" />
-                <span className="hidden sm:inline">Sair</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <ThemeToggle />
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors"
+                >
+                  <LogOut className="size-4 sm:size-5" />
+                  <span className="hidden sm:inline">Sair</span>
+                </button>
+              </div>
             </div>
-            <p className="text-zinc-300 text-base sm:text-lg">
+            <p className="text-zinc-700 dark:text-zinc-300 text-base sm:text-lg">
               Convide seus amigos e planeje sua próxima viagem!
             </p>
           </div>
 
           <div className="space-y-3 sm:space-y-4">
             {/* Seção 1: Destino e Data */}
-            <div className="h-auto sm:h-16 bg-zinc-900 p-3 sm:px-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center shadow-shape gap-3">
+            <div className="h-auto sm:h-16 bg-white dark:bg-zinc-900 p-3 sm:px-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center shadow-shape gap-3 border border-zinc-200 dark:border-zinc-800">
               <LocationAutocomplete
                 disabled={!isEditing && (isGuestsInputOpen || isTaskListOpen)}
                 value={destination}
@@ -145,12 +149,12 @@ export function App() {
                 className="w-full sm:w-40"
               />
 
-              <div className="hidden sm:block w-px h-6 bg-zinc-800" />
+              <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
 
               {isGuestsInputOpen || isTaskListOpen ? (
                 <button
                   onClick={toggleEditMode}
-                  className="bg-zinc-800 text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors"
+                  className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                 >
                   <span className="sm:hidden">
                     {isEditing ? "Concluir" : "Alterar"}
