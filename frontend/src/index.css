@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Variáveis de cores para modo dark (padrão) */
+:root.dark {
+  --bg-primary: #09090b;
+  --bg-secondary: #18181b;
+  --bg-tertiary: #27272a;
+  --text-primary: #fafafa;
+  --text-secondary: #d4d4d8;
+  --text-tertiary: #a1a1aa;
+}
+
+/* Variáveis de cores para modo light */
+:root.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-tertiary: #e4e4e7;
+  --text-primary: #18181b;
+  --text-secondary: #3f3f46;
+  --text-tertiary: #71717a;
+}
+
+/* Aplicar background padrão */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 * {
   min-width: 0;
   -webkit-tap-highlight-color: transparent; /* Remove highlight ao tocar em elementos */

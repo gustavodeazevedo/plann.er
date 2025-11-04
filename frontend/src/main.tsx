@@ -14,14 +14,16 @@ import { GuestAccess } from "./pages/GuestAccess";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { NotificationProvider } from "./components/Notification/context";
 import { LoadingProvider } from "./components/LoadingContext";
+import { ThemeProvider } from "./components/ThemeContext";
 import "./index.css";
 import "./styles/star-button.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId="804681981965-p0i2u26uc2j5qj5pk8che46cidk3i0ik.apps.googleusercontent.com">
-      <NotificationProvider>
-        <LoadingProvider>
+      <ThemeProvider>
+        <NotificationProvider>
+          <LoadingProvider>
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -62,6 +64,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           </BrowserRouter>
         </LoadingProvider>
       </NotificationProvider>
+      </ThemeProvider>
     </GoogleOAuthProvider>
   </React.StrictMode>
 );
