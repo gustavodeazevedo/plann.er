@@ -20,6 +20,8 @@ import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ErrorDisplay } from "../components/ErrorDisplay";
 import { TicketUpload } from "../components/TicketUpload";
 import { useErrorHandler } from "../utils/errorHandler";
+import { useTheme } from "../components/ThemeContext";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 interface TripDetails {
   _id: string;
@@ -65,6 +67,7 @@ export function TripSummary() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { handleError } = useErrorHandler();
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<"checklist" | "guests">(
     "checklist"
   );
@@ -178,11 +181,23 @@ export function TripSummary() {
 
   if (error || !trip) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+      <div
+        className={`min-h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center ${
+          theme === "dark" ? "bg-zinc-950" : "bg-zinc-50"
+        }`}
+      >
         <div className="max-w-3xl w-full px-6 py-8 text-center space-y-6">
-          <img src="/logo.svg" alt="plann.er" className="mx-auto" />
+          <img
+            src="/logo.svg"
+            alt="plann.er"
+            className={`mx-auto ${theme === "light" ? "invert" : ""}`}
+          />
           <div className="space-y-2">
-            <h2 className="text-zinc-300 text-xl font-medium">
+            <h2
+              className={`text-xl font-medium ${
+                theme === "dark" ? "text-zinc-300" : "text-zinc-900"
+              }`}
+            >
               Resumo não encontrado
             </h2>
             <ErrorDisplay
@@ -192,7 +207,11 @@ export function TripSummary() {
             />
             <button
               onClick={handleGoBack}
-              className="mt-4 bg-zinc-800 text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors mx-auto"
+              className={`mt-4 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 transition-colors mx-auto ${
+                theme === "dark"
+                  ? "bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+                  : "bg-white text-zinc-900 hover:bg-zinc-100 border border-zinc-300"
+              }`}
             >
               <ArrowLeft className="size-4" />
               Voltar para o início
@@ -204,47 +223,126 @@ export function TripSummary() {
   }
 
   return (
-    <div className="min-h-screen bg-pattern bg-no-repeat bg-center pt-6 pb-16">
+    <div
+      className={`min-h-screen bg-pattern bg-no-repeat bg-center pt-6 pb-16 ${
+        theme === "dark" ? "bg-zinc-950" : "bg-zinc-50"
+      }`}
+    >
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={handleGoBack}
-            className="bg-zinc-800 text-zinc-200 rounded-lg px-3 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors"
+            className={`rounded-lg px-3 py-2 font-medium flex items-center justify-center gap-2 transition-colors ${
+              theme === "dark"
+                ? "bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+                : "bg-white text-zinc-900 hover:bg-zinc-100 border border-zinc-300"
+            }`}
           >
             <ArrowLeft className="size-4" />
             <span>Voltar</span>
           </button>
 
-          <img src="/logo.svg" alt="plann.er" className="h-8" />
+          <div className="flex items-center gap-4">
+            <img
+              src="/logo.svg"
+              alt="plann.er"
+              className={`h-8 ${theme === "light" ? "invert" : ""}`}
+            />
+            <ThemeToggle />
+          </div>
         </div>
 
-        <div className="bg-zinc-900 rounded-xl p-5 shadow-shape mb-6">
-          <h1 className="text-xl font-semibold mb-4 text-center">
+        <div
+          className={`rounded-xl p-5 shadow-shape mb-6 ${
+            theme === "dark" ? "bg-zinc-900" : "bg-white"
+          }`}
+        >
+          <h1
+            className={`text-xl font-semibold mb-4 text-center ${
+              theme === "dark" ? "text-white" : "text-zinc-900"
+            }`}
+          >
             Resumo da Viagem
           </h1>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-6">
-            <div className="flex items-center gap-3 bg-zinc-800 px-4 py-3 rounded-lg">
-              <MapPin className="text-lime-300 size-5" />
-              <span className="text-lg">{trip.destination}</span>
+            <div
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
+                theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+              }`}
+            >
+              <MapPin
+                className={`size-5 ${
+                  theme === "dark" ? "text-lime-300" : "text-lime-600"
+                }`}
+              />
+              <span
+                className={`text-lg ${
+                  theme === "dark" ? "text-white" : "text-zinc-900"
+                }`}
+              >
+                {trip.destination}
+              </span>
             </div>
 
-            <div className="flex items-center gap-3 bg-zinc-800 px-4 py-3 rounded-lg">
-              <Calendar className="text-lime-300 size-5" />
-              <span className="text-lg">{formatDate(trip.date)}</span>
+            <div
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
+                theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+              }`}
+            >
+              <Calendar
+                className={`size-5 ${
+                  theme === "dark" ? "text-lime-300" : "text-lime-600"
+                }`}
+              />
+              <span
+                className={`text-lg ${
+                  theme === "dark" ? "text-white" : "text-zinc-900"
+                }`}
+              >
+                {formatDate(trip.date)}
+              </span>
             </div>
           </div>
 
           {ticketUrl && ticketName ? (
-            <div className="mt-4 border-t border-zinc-800 pt-4">
-              <div className="bg-zinc-800 rounded-lg p-3 flex items-center justify-between">
+            <div
+              className={`mt-4 border-t pt-4 ${
+                theme === "dark" ? "border-zinc-800" : "border-zinc-200"
+              }`}
+            >
+              <div
+                className={`rounded-lg p-3 flex items-center justify-between ${
+                  theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="bg-lime-500/20 p-2 rounded-lg">
-                    <FileText className="size-5 text-lime-300" />
+                  <div
+                    className={`p-2 rounded-lg ${
+                      theme === "dark" ? "bg-lime-500/20" : "bg-lime-100"
+                    }`}
+                  >
+                    <FileText
+                      className={`size-5 ${
+                        theme === "dark" ? "text-lime-300" : "text-lime-600"
+                      }`}
+                    />
                   </div>
                   <div>
-                    <p className="font-medium">Passagem Aérea</p>
-                    <p className="text-sm text-zinc-400">{ticketName}</p>
+                    <p
+                      className={`font-medium ${
+                        theme === "dark" ? "text-white" : "text-zinc-900"
+                      }`}
+                    >
+                      Passagem
+                    </p>
+                    <p
+                      className={`text-sm ${
+                        theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                      }`}
+                    >
+                      {ticketName}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -293,15 +391,37 @@ export function TripSummary() {
               </div>
             </div>
           ) : (
-            <div className="mt-4 border-t border-zinc-800 pt-4">
-              <div className="bg-zinc-800 rounded-lg p-3 flex items-center justify-between">
+            <div
+              className={`mt-4 border-t pt-4 ${
+                theme === "dark" ? "border-zinc-800" : "border-zinc-200"
+              }`}
+            >
+              <div
+                className={`rounded-lg p-3 flex items-center justify-between ${
+                  theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+                }`}
+              >
                 <div className="flex items-center gap-3">
                   <div className="bg-zinc-500/20 p-2 rounded-lg">
-                    <FileText className="size-5 text-zinc-400" />
+                    <FileText
+                      className={`size-5 ${
+                        theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                      }`}
+                    />
                   </div>
                   <div>
-                    <p className="font-medium text-zinc-400">Passagem Aérea</p>
-                    <p className="text-sm text-zinc-500">
+                    <p
+                      className={`font-medium ${
+                        theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                      }`}
+                    >
+                      Passagem Aérea
+                    </p>
+                    <p
+                      className={`text-sm ${
+                        theme === "dark" ? "text-zinc-500" : "text-zinc-500"
+                      }`}
+                    >
                       Nenhuma passagem anexada
                     </p>
                   </div>
@@ -319,19 +439,33 @@ export function TripSummary() {
           )}
         </div>
 
-        <div className="flex mb-4 border-b border-zinc-800">
+        <div
+          className={`flex mb-4 border-b ${
+            theme === "dark" ? "border-zinc-800" : "border-zinc-200"
+          }`}
+        >
           <button
             className={`py-3 px-5 flex items-center gap-2 transition-colors ${
               activeTab === "checklist"
-                ? "border-b-2 border-lime-300 text-white"
-                : "text-zinc-400 hover:text-zinc-300"
+                ? theme === "dark"
+                  ? "border-b-2 border-lime-300 text-white"
+                  : "border-b-2 border-lime-600 text-zinc-900 font-medium"
+                : theme === "dark"
+                ? "text-zinc-400 hover:text-zinc-300"
+                : "text-zinc-600 hover:text-zinc-900"
             }`}
             onClick={() => setActiveTab("checklist")}
           >
             <CheckSquare className="size-4" />
             <span>Lista de Itens</span>
             {checklistItems.length > 0 && (
-              <span className="bg-lime-300 text-lime-950 rounded-full text-xs px-2 py-0.5 font-medium">
+              <span
+                className={`rounded-full text-xs px-2 py-0.5 font-medium ${
+                  theme === "dark"
+                    ? "bg-lime-300 text-lime-950"
+                    : "bg-lime-600 text-white"
+                }`}
+              >
                 {checklistItems.length}
               </span>
             )}
@@ -340,15 +474,25 @@ export function TripSummary() {
           <button
             className={`py-3 px-5 flex items-center gap-2 transition-colors ${
               activeTab === "guests"
-                ? "border-b-2 border-lime-300 text-white"
-                : "text-zinc-400 hover:text-zinc-300"
+                ? theme === "dark"
+                  ? "border-b-2 border-lime-300 text-white"
+                  : "border-b-2 border-lime-600 text-zinc-900 font-medium"
+                : theme === "dark"
+                ? "text-zinc-400 hover:text-zinc-300"
+                : "text-zinc-600 hover:text-zinc-900"
             }`}
             onClick={() => setActiveTab("guests")}
           >
             <Users className="size-4" />
             <span>Convidados</span>
             {guests.length > 0 && (
-              <span className="bg-lime-300 text-lime-950 rounded-full text-xs px-2 py-0.5 font-medium">
+              <span
+                className={`rounded-full text-xs px-2 py-0.5 font-medium ${
+                  theme === "dark"
+                    ? "bg-lime-300 text-lime-950"
+                    : "bg-lime-600 text-white"
+                }`}
+              >
                 {guests.length}
               </span>
             )}
@@ -356,9 +500,19 @@ export function TripSummary() {
         </div>
 
         {activeTab === "checklist" && (
-          <div className="bg-zinc-900 rounded-xl p-5 shadow-shape">
+          <div
+            className={`rounded-xl p-5 shadow-shape ${
+              theme === "dark" ? "bg-zinc-900" : "bg-white"
+            }`}
+          >
             <div className="mb-4">
-              <h2 className="text-lg font-semibold">Itens para levar</h2>
+              <h2
+                className={`text-lg font-semibold ${
+                  theme === "dark" ? "text-white" : "text-zinc-900"
+                }`}
+              >
+                Itens para levar
+              </h2>
             </div>
 
             {isLoadingChecklist ? (
@@ -366,7 +520,11 @@ export function TripSummary() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-500"></div>
               </div>
             ) : checklistItems.length === 0 ? (
-              <div className="text-center py-8 text-zinc-400">
+              <div
+                className={`text-center py-8 ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              >
                 <CheckSquare className="size-10 mx-auto mb-2 opacity-50" />
                 <p>Nenhum item adicionado ainda.</p>
               </div>
@@ -375,20 +533,50 @@ export function TripSummary() {
                 {checklistItems.map((item) => (
                   <li
                     key={item._id}
-                    className="bg-zinc-800 rounded-lg p-3 flex items-center justify-between"
+                    className={`rounded-lg p-3 flex items-center justify-between ${
+                      theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+                    }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="flex-1">{item.description}</span>
+                      <span
+                        className={`flex-1 ${
+                          theme === "dark" ? "text-white" : "text-zinc-900"
+                        }`}
+                      >
+                        {item.description}
+                      </span>
                     </div>
                     <div className="flex items-center">
                       {item.completed ? (
-                        <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded-full flex items-center gap-1">
-                          <span className="size-1.5 bg-green-400 rounded-full"></span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+                            theme === "dark"
+                              ? "bg-green-500/20 text-green-300"
+                              : "bg-green-100 text-green-700"
+                          }`}
+                        >
+                          <span
+                            className={`size-1.5 rounded-full ${
+                              theme === "dark" ? "bg-green-400" : "bg-green-600"
+                            }`}
+                          ></span>
                           Concluído
                         </span>
                       ) : (
-                        <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full flex items-center gap-1">
-                          <span className="size-1.5 bg-yellow-400 rounded-full"></span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+                            theme === "dark"
+                              ? "bg-yellow-500/20 text-yellow-300"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          <span
+                            className={`size-1.5 rounded-full ${
+                              theme === "dark"
+                                ? "bg-yellow-400"
+                                : "bg-amber-600"
+                            }`}
+                          ></span>
                           Pendente
                         </span>
                       )}
@@ -401,13 +589,27 @@ export function TripSummary() {
         )}
 
         {activeTab === "guests" && (
-          <div className="bg-zinc-900 rounded-xl p-5 shadow-shape">
+          <div
+            className={`rounded-xl p-5 shadow-shape ${
+              theme === "dark" ? "bg-zinc-900" : "bg-white"
+            }`}
+          >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Convidados</h2>
+              <h2
+                className={`text-lg font-semibold ${
+                  theme === "dark" ? "text-white" : "text-zinc-900"
+                }`}
+              >
+                Convidados
+              </h2>
             </div>
 
             {guests.length === 0 ? (
-              <div className="text-center py-8 text-zinc-400">
+              <div
+                className={`text-center py-8 ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              >
                 <Users className="size-10 mx-auto mb-2 opacity-50" />
                 <p>Nenhum convidado adicionado ainda.</p>
               </div>
@@ -416,15 +618,37 @@ export function TripSummary() {
                 {guests.map((guest) => (
                   <li
                     key={guest._id}
-                    className="bg-zinc-800 rounded-lg p-3 flex items-center justify-between"
+                    className={`rounded-lg p-3 flex items-center justify-between ${
+                      theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+                    }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="bg-zinc-700 rounded-full p-2">
-                        <User className="size-5 text-zinc-300" />
+                      <div
+                        className={`rounded-full p-2 ${
+                          theme === "dark" ? "bg-zinc-700" : "bg-zinc-200"
+                        }`}
+                      >
+                        <User
+                          className={`size-5 ${
+                            theme === "dark" ? "text-zinc-300" : "text-zinc-600"
+                          }`}
+                        />
                       </div>
                       <div>
-                        <p className="font-medium">{guest.name}</p>
-                        <p className="text-sm text-zinc-400">{guest.email}</p>
+                        <p
+                          className={`font-medium ${
+                            theme === "dark" ? "text-white" : "text-zinc-900"
+                          }`}
+                        >
+                          {guest.name}
+                        </p>
+                        <p
+                          className={`text-sm ${
+                            theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                          }`}
+                        >
+                          {guest.email}
+                        </p>
                       </div>
                     </div>
                   </li>
@@ -437,11 +661,17 @@ export function TripSummary() {
 
       {/* Modal de upload de passagem */}
       {isTicketUploadOpen && id && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-zinc-900 rounded-xl p-6 w-full max-w-md relative">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div
+            className={`rounded-xl p-6 w-full max-w-md relative ${
+              theme === "dark" ? "bg-zinc-900" : "bg-white"
+            }`}
+          >
             <button
               onClick={() => setIsTicketUploadOpen(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-white"
+              className={`absolute top-4 right-4 hover:text-white ${
+                theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+              }`}
               title="Fechar"
             >
               <X className="size-5" />
