@@ -6,6 +6,8 @@ import { useNotification } from "../components/Notification/context";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ErrorDisplay } from "../components/ErrorDisplay";
 import { useErrorHandler } from "../utils/errorHandler";
+import { useTheme } from "../components/ThemeContext";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 interface TripDetails {
   _id: string;
@@ -40,6 +42,7 @@ export function TripDetails() {
   const [isOwner, setIsOwner] = useState(false);
   const { showNotification } = useNotification();
   const { handleError } = useErrorHandler();
+  const { theme } = useTheme();
 
   const email = searchParams.get("email");
   const accessId = searchParams.get("accessId");
@@ -153,7 +156,11 @@ export function TripDetails() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+      <div
+        className={`h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center ${
+          theme === "dark" ? "bg-zinc-950" : "bg-zinc-50"
+        }`}
+      >
         <div className="max-w-md w-full px-6 text-center">
           <LoadingIndicator
             size="large"
@@ -166,11 +173,23 @@ export function TripDetails() {
 
   if (error || !trip) {
     return (
-      <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+      <div
+        className={`h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center ${
+          theme === "dark" ? "bg-zinc-950" : "bg-zinc-50"
+        }`}
+      >
         <div className="max-w-md w-full px-6 text-center space-y-6">
-          <img src="/logo.svg" alt="plann.er" className="mx-auto" />
+          <img
+            src="/logo.svg"
+            alt="plann.er"
+            className={`mx-auto ${theme === "light" ? "invert" : ""}`}
+          />
           <div className="space-y-2">
-            <h2 className="text-zinc-300 text-lg font-medium">
+            <h2
+              className={`text-lg font-medium ${
+                theme === "dark" ? "text-zinc-300" : "text-zinc-900"
+              }`}
+            >
               Viagem não encontrada
             </h2>
             <ErrorDisplay
@@ -188,48 +207,130 @@ export function TripDetails() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+    <div
+      className={`h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center ${
+        theme === "dark" ? "bg-zinc-950" : "bg-zinc-50"
+      }`}
+    >
       <div className="max-w-md w-full px-6 text-center space-y-10">
         <div className="flex flex-col items-center gap-3">
-          <img src="/logo.svg" alt="plann.er" />
-          <h2 className="text-zinc-300 text-lg font-medium">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex-1"></div>
+            <img
+              src="/logo.svg"
+              alt="plann.er"
+              className={theme === "light" ? "invert" : ""}
+            />
+            <div className="flex-1 flex justify-end">
+              <ThemeToggle />
+            </div>
+          </div>
+          <h2
+            className={`text-lg font-medium ${
+              theme === "dark" ? "text-zinc-300" : "text-zinc-900"
+            }`}
+          >
             Detalhes da Viagem
           </h2>
         </div>
 
         <div className="space-y-6">
-          <div className="bg-zinc-900 p-6 rounded-lg space-y-4">
+          <div
+            className={`p-6 rounded-lg space-y-4 ${
+              theme === "dark" ? "bg-zinc-900" : "bg-white"
+            }`}
+          >
             <div className="space-y-1">
-              <p className="text-zinc-400 text-sm">Convidado</p>
+              <p
+                className={`text-sm ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              >
+                Convidado
+              </p>
               <div className="flex items-center justify-center gap-2">
-                <User className="size-5 text-zinc-400" />
-                <p className="text-zinc-200 text-lg">
+                <User
+                  className={`size-5 ${
+                    theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                  }`}
+                />
+                <p
+                  className={`text-lg ${
+                    theme === "dark" ? "text-zinc-200" : "text-zinc-900"
+                  }`}
+                >
                   {guest?.name || "Convidado"}
                 </p>
               </div>
             </div>
 
             <div className="space-y-1">
-              <p className="text-zinc-400 text-sm">Destino</p>
+              <p
+                className={`text-sm ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              >
+                Destino
+              </p>
               <div className="flex items-center justify-center gap-2">
-                <MapPin className="size-5 text-zinc-400" />
-                <p className="text-zinc-200 text-lg">{trip.destination}</p>
+                <MapPin
+                  className={`size-5 ${
+                    theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                  }`}
+                />
+                <p
+                  className={`text-lg ${
+                    theme === "dark" ? "text-zinc-200" : "text-zinc-900"
+                  }`}
+                >
+                  {trip.destination}
+                </p>
               </div>
             </div>
 
             <div className="space-y-1">
-              <p className="text-zinc-400 text-sm">Data</p>
+              <p
+                className={`text-sm ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              >
+                Data
+              </p>
               <div className="flex items-center justify-center gap-2">
-                <Calendar className="size-5 text-zinc-400" />
-                <p className="text-zinc-200 text-lg">{trip.date}</p>
+                <Calendar
+                  className={`size-5 ${
+                    theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                  }`}
+                />
+                <p
+                  className={`text-lg ${
+                    theme === "dark" ? "text-zinc-200" : "text-zinc-900"
+                  }`}
+                >
+                  {trip.date}
+                </p>
               </div>
             </div>
 
             <div className="space-y-1">
-              <p className="text-zinc-400 text-sm">Organizador</p>
+              <p
+                className={`text-sm ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              >
+                Organizador
+              </p>
               <div className="flex items-center justify-center gap-2">
-                <User className="size-5 text-zinc-400" />
-                <p className="text-zinc-200 text-lg">
+                <User
+                  className={`size-5 ${
+                    theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                  }`}
+                />
+                <p
+                  className={`text-lg ${
+                    theme === "dark" ? "text-zinc-200" : "text-zinc-900"
+                  }`}
+                >
                   {trip.organizer?.name ||
                     (isOwner ? "Você" : "Organizador da viagem")}
                 </p>
