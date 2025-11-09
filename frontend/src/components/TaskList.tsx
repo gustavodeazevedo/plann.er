@@ -5,6 +5,7 @@ import { useNotification } from "./Notification/context";
 import "../styles/task-list.css";
 import { syncService } from "../lib/syncService";
 import { useErrorHandler } from "../utils/errorHandler";
+import { useTheme } from "./ThemeContext";
 
 interface Task {
   _id: string;
@@ -26,6 +27,7 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
   const [error, setError] = useState<string | null>(null);
   const { showNotification } = useNotification();
   const { handleError } = useErrorHandler();
+  const { theme } = useTheme();
 
   // Função aprimorada para buscar tarefas
   function fetchTasks() {
@@ -202,31 +204,51 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
     <div className="space-y-4">
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium text-zinc-300">
+          <h3
+            className={`text-lg font-medium ${
+              theme === "dark" ? "text-zinc-300" : "text-zinc-800"
+            }`}
+          >
             O que levar na viagem
           </h3>
           <button
             onClick={fetchTasks}
-            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded-md transition-colors filter-button"
+            className={`text-xs px-2 py-1 rounded-md transition-colors filter-button ${
+              theme === "dark"
+                ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+            }`}
             title="Sincronizar tarefas"
           >
             Atualizar
           </button>
         </div>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p
+          className={`text-sm mt-1 ${
+            theme === "dark" ? "text-zinc-500" : "text-gray-600"
+          }`}
+        >
           Adicione itens que você não pode esquecer de levar
         </p>
 
         {/* Barra de progresso */}
         <div className="mt-3 mb-1">
-          <div className="flex justify-between text-xs text-zinc-400 mb-1">
+          <div
+            className={`flex justify-between text-xs mb-1 ${
+              theme === "dark" ? "text-zinc-400" : "text-gray-600"
+            }`}
+          >
             <span>Progresso</span>
             <span>
               {completedTasks} de {totalTasks} concluídos ({progressPercentage}
               %)
             </span>
           </div>
-          <div className="w-full bg-zinc-800 rounded-full h-2.5">
+          <div
+            className={`w-full rounded-full h-2.5 ${
+              theme === "dark" ? "bg-zinc-800" : "bg-gray-200"
+            }`}
+          >
             <div
               className="bg-lime-500 h-2.5 rounded-full transition-all duration-500 progress-bar-fill"
               style={{ width: `${progressPercentage}%` }}
@@ -238,12 +260,20 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
       {/* Formulário para adicionar nova tarefa */}
       <form
         onSubmit={handleAddTask}
-        className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800"
+        className={`flex items-center gap-2 p-2 rounded-lg border ${
+          theme === "dark"
+            ? "bg-zinc-900 border-zinc-800"
+            : "bg-gray-50 border-gray-300"
+        }`}
       >
         <input
           type="text"
           placeholder="Adicionar um item..."
-          className="bg-transparent text-zinc-100 placeholder-zinc-500 outline-none flex-1 text-sm p-1 task-input"
+          className={`bg-transparent outline-none flex-1 text-sm p-1 task-input ${
+            theme === "dark"
+              ? "text-zinc-100 placeholder-zinc-500"
+              : "text-zinc-900 placeholder-gray-500"
+          }`}
           value={newTaskDescription}
           onChange={(e) => setNewTaskDescription(e.target.value)}
           disabled={isLoading}
@@ -259,11 +289,21 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
       </form>
 
       {error && (
-        <div className="flex items-center justify-between bg-red-950/30 text-red-300 p-2 rounded border border-red-800 text-xs">
+        <div
+          className={`flex items-center justify-between p-2 rounded border text-xs ${
+            theme === "dark"
+              ? "bg-red-950/30 text-red-300 border-red-800"
+              : "bg-red-100 text-red-700 border-red-300"
+          }`}
+        >
           <p>{error}</p>
           <button
             onClick={() => setError(null)}
-            className="text-red-300 hover:text-red-200"
+            className={`${
+              theme === "dark"
+                ? "text-red-300 hover:text-red-200"
+                : "text-red-700 hover:text-red-600"
+            }`}
           >
             <X size={14} />
           </button>
@@ -273,16 +313,26 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
       {/* Lista de tarefas */}
       <div className="space-y-2 max-h-[320px] overflow-y-auto pr-2 task-list-container">
         {tasks.length === 0 ? (
-          <div className="bg-zinc-800/30 p-4 rounded-lg border border-zinc-700/50 text-center">
-            <p className="text-zinc-500 text-sm">Nenhum item adicionado</p>
+          <div
+            className={`p-4 rounded-lg border text-center ${
+              theme === "dark"
+                ? "bg-zinc-800/30 border-zinc-700/50 text-zinc-500"
+                : "bg-gray-100 border-gray-300 text-gray-600"
+            }`}
+          >
+            <p className="text-sm">Nenhum item adicionado</p>
           </div>
         ) : (
           tasks.map((task) => (
             <div
               key={task._id}
-              className={`flex items-center justify-between bg-zinc-800/50 p-3 rounded-lg border-l-4 group task-item hover:bg-zinc-800 transition-all ${
+              className={`flex items-center justify-between p-3 rounded-lg border-l-4 group task-item transition-all ${
                 task.completed ? "completed opacity-70" : ""
-              } border-zinc-700`}
+              } ${
+                theme === "dark"
+                  ? "bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800"
+                  : "bg-white border-gray-300 hover:bg-gray-50 shadow-sm"
+              }`}
             >
               <div className="flex items-center gap-3 flex-1">
                 <button
@@ -292,7 +342,9 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
                   className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center task-checkbox ${
                     task.completed
                       ? "bg-lime-400 text-lime-950 checked"
-                      : "border border-zinc-600 hover:border-zinc-400"
+                      : theme === "dark"
+                      ? "border border-zinc-600 hover:border-zinc-400"
+                      : "border border-gray-400 hover:border-gray-600"
                   }`}
                 >
                   {task.completed && <Check size={12} strokeWidth={3} />}
@@ -301,8 +353,12 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
                 <p
                   className={`text-sm ${
                     task.completed
-                      ? "line-through text-zinc-500"
-                      : "text-zinc-200"
+                      ? theme === "dark"
+                        ? "line-through text-zinc-500"
+                        : "line-through text-gray-500"
+                      : theme === "dark"
+                      ? "text-zinc-200"
+                      : "text-zinc-800"
                   }`}
                 >
                   {task.description}
@@ -311,7 +367,11 @@ export function TaskList({ tripId, onTaskAdded }: TaskListProps) {
 
               <button
                 onClick={() => handleDeleteTask(task._id)}
-                className="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+                  theme === "dark"
+                    ? "text-zinc-500 hover:text-red-400"
+                    : "text-gray-400 hover:text-red-500"
+                }`}
               >
                 <Trash2 size={16} />
               </button>
