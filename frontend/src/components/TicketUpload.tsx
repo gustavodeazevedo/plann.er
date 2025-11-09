@@ -3,6 +3,7 @@ import { FileText, Upload, Trash2, X, Check, AlertCircle } from "lucide-react";
 import { api } from "../lib/axios";
 import { useNotification } from "./Notification/context";
 import { useErrorHandler } from "../utils/errorHandler";
+import { useTheme } from "./ThemeContext";
 
 interface TicketUploadProps {
   tripId: string;
@@ -18,6 +19,7 @@ export function TicketUpload({ tripId }: TicketUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showNotification } = useNotification();
   const { handleError } = useErrorHandler();
+  const { theme } = useTheme();
 
   // Ao montar o componente, verificar se já existe um ticket para esta viagem
   useState(() => {
@@ -144,9 +146,19 @@ export function TicketUpload({ tripId }: TicketUploadProps) {
     <div className="space-y-4">
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium text-zinc-300">Passagem Aérea</h3>
+          <h3
+            className={`text-lg font-medium ${
+              theme === "dark" ? "text-zinc-300" : "text-zinc-900"
+            }`}
+          >
+            Passagem Aérea
+          </h3>
         </div>
-        <p className="text-sm text-zinc-500">
+        <p
+          className={`text-sm ${
+            theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+          }`}
+        >
           Anexe sua passagem para ter acesso fácil durante sua viagem
         </p>
       </div>
@@ -167,15 +179,34 @@ export function TicketUpload({ tripId }: TicketUploadProps) {
       )}
 
       {!uploadedTicket ? (
-        <div className="border-2 border-dashed border-zinc-700 rounded-lg p-8 text-center hover:border-zinc-500 transition-colors">
+        <div
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            theme === "dark"
+              ? "border-zinc-700 hover:border-zinc-500"
+              : "border-zinc-300 hover:border-zinc-400"
+          }`}
+        >
           <div className="flex flex-col items-center gap-2">
-            <FileText size={36} className="text-zinc-500" />
-            <p className="text-zinc-400 text-sm">
+            <FileText
+              size={36}
+              className={`${
+                theme === "dark" ? "text-zinc-500" : "text-zinc-400"
+              }`}
+            />
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+              }`}
+            >
               Arraste o PDF da sua passagem aqui ou
             </p>
             <label
               htmlFor="ticket-upload"
-              className="bg-lime-500 text-lime-950 rounded-md px-4 py-2 flex items-center gap-1 hover:bg-lime-400 transition-colors cursor-pointer font-medium mt-2"
+              className={`rounded-md px-4 py-2 flex items-center gap-1 transition-colors cursor-pointer font-medium mt-2 ${
+                theme === "dark"
+                  ? "bg-lime-500 text-lime-950 hover:bg-lime-400"
+                  : "bg-white text-zinc-900 hover:bg-zinc-50 border-2 border-zinc-900"
+              }`}
             >
               <Upload size={16} />
               Selecionar arquivo
@@ -189,31 +220,68 @@ export function TicketUpload({ tripId }: TicketUploadProps) {
               disabled={isLoading}
               className="hidden"
             />
-            <p className="text-zinc-500 text-xs mt-2">Apenas PDFs (max. 5MB)</p>
+            <p
+              className={`text-xs mt-2 ${
+                theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+              }`}
+            >
+              Apenas PDFs (max. 5MB)
+            </p>
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-800 rounded-lg p-4">
+        <div
+          className={`rounded-lg p-4 ${
+            theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <div
-              className="flex items-center flex-1 gap-3 cursor-pointer hover:bg-zinc-700/50 p-2 rounded-lg transition-colors"
+              className={`flex items-center flex-1 gap-3 cursor-pointer p-2 rounded-lg transition-colors ${
+                theme === "dark"
+                  ? "hover:bg-zinc-700/50"
+                  : "hover:bg-zinc-200/50"
+              }`}
               onClick={handleViewTicket}
               title="Clique para visualizar a passagem"
             >
-              <div className="bg-lime-500/20 p-2 rounded-lg">
-                <FileText size={24} className="text-lime-300" />
+              <div
+                className={`p-2 rounded-lg ${
+                  theme === "dark" ? "bg-lime-500/20" : "bg-lime-500/30"
+                }`}
+              >
+                <FileText
+                  size={24}
+                  className={`${
+                    theme === "dark" ? "text-lime-300" : "text-lime-600"
+                  }`}
+                />
               </div>
               <div className="flex-1">
-                <p className="text-zinc-300 font-medium truncate">
+                <p
+                  className={`font-medium truncate ${
+                    theme === "dark" ? "text-zinc-300" : "text-zinc-900"
+                  }`}
+                >
                   {uploadedTicketName}
                 </p>
-                <p className="text-zinc-500 text-xs">Clique para visualizar</p>
+                <p
+                  className={`text-xs ${
+                    theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+                  }`}
+                >
+                  Clique para visualizar
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleDeleteTicket}
-                className="bg-zinc-700 hover:bg-red-700 p-2 rounded text-zinc-300"
+                className={`p-2 rounded transition-colors ${
+                  theme === "dark"
+                    ? "bg-zinc-700 hover:bg-red-700 text-zinc-300"
+                    : "bg-zinc-300 hover:bg-red-500 text-zinc-800 hover:text-white"
+                }`}
                 title="Remover passagem"
                 disabled={isLoading}
               >
