@@ -27,6 +27,7 @@ import { useAuth } from "./hooks/useAuth";
 import { TicketUpload } from "./components/TicketUpload";
 import { MorphingButton } from "./components/MorphingButton";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { useTheme } from "./components/ThemeContext";
 
 interface ShareLink {
   shareUrl: string;
@@ -70,6 +71,7 @@ export function App() {
   const { user, handleLogout } = useAuth();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   // Função para alternar o modo de edição de local/data
   const toggleEditMode = useCallback(() => {
@@ -92,40 +94,36 @@ export function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-pattern bg-no-repeat bg-center bg-zinc-50 dark:bg-zinc-950">
-      {user && (
-        <div className="w-full">
-          <div className="max-w-3xl mx-auto py-4 px-4 sm:px-6 text-center">
-            <div className="flex justify-between items-center">
-              <span className="text-xl sm:text-2xl font-medium welcome-text text-zinc-900 dark:text-zinc-100">
-                Olá, {user.name}
-              </span>
-              {createdTripId && (
-                <button
-                  onClick={startNewTrip}
-                  className="text-sm text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors"
-                >
-                  Iniciar nova viagem
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex-1 flex items-center justify-center p-4 sm:p-0">
         <div className="max-w-3xl w-full px-4 sm:px-6 text-center space-y-6 sm:space-y-10">
           <div className="flex flex-col items-center gap-3">
             <div className="w-full flex items-center justify-between">
-              <img src="/logo.svg" alt="plann.er" className="w-32 sm:w-auto" />
+              <img
+                src="/logo.svg"
+                alt="plann.er"
+                className={`w-32 sm:w-auto ${
+                  theme === "light" ? "invert" : ""
+                }`}
+              />
               <div className="flex items-center gap-3">
                 <ThemeToggle />
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors"
-                >
-                  <LogOut className="size-4 sm:size-5" />
-                  <span className="hidden sm:inline">Sair</span>
-                </button>
+                {user && createdTripId && (
+                  <button
+                    onClick={startNewTrip}
+                    className="text-sm text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors"
+                  >
+                    Nova viagem
+                  </button>
+                )}
+                {user && (
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors"
+                  >
+                    <LogOut className="size-4 sm:size-5" />
+                    <span className="hidden sm:inline">Sair</span>
+                  </button>
+                )}
               </div>
             </div>
             <p className="text-zinc-700 dark:text-zinc-300 text-base sm:text-lg">
@@ -190,7 +188,11 @@ export function App() {
 
             {/* Seção 2: Lista de Itens (visível quando isTaskListOpen for true) */}
             {createdTripId && isTaskListOpen && (
-              <div className="bg-zinc-900 p-4 rounded-xl shadow-shape">
+              <div
+                className={`p-4 rounded-xl shadow-shape ${
+                  theme === "dark" ? "bg-zinc-900" : "bg-white"
+                }`}
+              >
                 <StableTaskList tripId={createdTripId} />
 
                 <div className="mt-6 flex justify-center">
@@ -206,23 +208,31 @@ export function App() {
 
             {/* Seção 3: Botão de Adicionar Convidados */}
             {isGuestsInputOpen && (
-              <div className="h-auto sm:h-16 bg-zinc-900 p-3 sm:px-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center shadow-shape gap-3">
+              <div
+                className={`h-auto sm:h-16 p-3 sm:px-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center shadow-shape gap-3 ${
+                  theme === "dark"
+                    ? "bg-zinc-900"
+                    : "bg-white border border-zinc-200"
+                }`}
+              >
                 <button
                   type="button"
                   onClick={openGuestsModal}
-                  className="flex items-center gap-2 flex-1 text-left"
+                  className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex-1"
                 >
-                  <User className="size-5 text-zinc-400 flex-shrink-0" />
-                  <span className="text-zinc-400 text-base sm:text-lg flex-1">
-                    Adicionar convidado
-                  </span>
+                  <User className="size-4 sm:size-5" />
+                  <span>Adicionar convidado</span>
                 </button>
 
-                <div className="hidden sm:block w-px h-6 bg-zinc-800" />
+                <div
+                  className={`hidden sm:block w-px h-6 ${
+                    theme === "dark" ? "bg-zinc-800" : "bg-zinc-300"
+                  }`}
+                />
 
                 <button
                   onClick={openTicketUpload}
-                  className="bg-zinc-800 text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-700 transition-colors"
+                  className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 rounded-lg px-4 py-2 font-medium flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                 >
                   <FileText className="size-4 sm:size-5" />
                   <span>Anexar passagem</span>
@@ -232,7 +242,11 @@ export function App() {
 
             {/* Seção 4: Upload de Passagem */}
             {isGuestsInputOpen && isTicketUploadOpen && createdTripId && (
-              <div className="bg-zinc-900 p-4 rounded-xl shadow-shape">
+              <div
+                className={`p-4 rounded-xl shadow-shape ${
+                  theme === "dark" ? "bg-zinc-900" : "bg-white"
+                }`}
+              >
                 <TicketUpload tripId={createdTripId} />
 
                 <div className="mt-6 flex justify-center">
@@ -289,18 +303,32 @@ export function App() {
 
       {/* Modal para gerenciar convidados - agora com o componente GuestList integrado */}
       {isGuestsModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="w-full max-w-[640px] rounded-xl py-5 px-4 sm:px-6 shadow-shape bg-zinc-900 space-y-5 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div
+            className={`w-full max-w-[640px] rounded-xl py-5 px-4 sm:px-6 shadow-shape space-y-5 max-h-[90vh] overflow-y-auto ${
+              theme === "dark" ? "bg-zinc-900" : "bg-white"
+            }`}
+          >
             <div className="flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-semibold">
+              <h2
+                className={`text-base sm:text-lg font-semibold ${
+                  theme === "dark" ? "text-white" : "text-zinc-900"
+                }`}
+              >
                 Gerenciar Convidados
               </h2>
               <button
                 title="Fechar"
                 onClick={closeGuestsModal}
-                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                className={`p-2 rounded-lg transition-colors ${
+                  theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100"
+                }`}
               >
-                <X className="size-4 sm:size-5 text-zinc-400" />
+                <X
+                  className={`size-4 sm:size-5 ${
+                    theme === "dark" ? "text-zinc-400" : "text-zinc-500"
+                  }`}
+                />
               </button>
             </div>
 
