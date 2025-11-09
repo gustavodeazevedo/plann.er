@@ -3,6 +3,7 @@ import ReactDatePicker from "react-datepicker";
 import { Calendar } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
 import pt from "date-fns/locale/pt-BR";
+import { useTheme } from "./ThemeContext";
 
 interface DatePickerProps {
   value: string;
@@ -21,6 +22,7 @@ export function DatePicker({
 }: DatePickerProps) {
   const [date, setDate] = useState<Date | null>(null);
   const datePickerRef = useRef<ReactDatePicker>(null);
+  const { theme } = useTheme();
 
   // Parse string date to Date object when value changes
   useEffect(() => {
@@ -80,7 +82,9 @@ export function DatePicker({
     <div className="relative flex-1">
       <div className="flex items-center gap-2 w-full">
         <Calendar
-          className="size-5 text-zinc-400 flex-shrink-0 cursor-pointer"
+          className={`size-5 flex-shrink-0 cursor-pointer ${
+            theme === "dark" ? "text-zinc-400" : "text-zinc-500"
+          }`}
           onClick={handleCalendarClick}
         />
         <ReactDatePicker
@@ -91,9 +95,21 @@ export function DatePicker({
           locale={pt}
           placeholderText={placeholder}
           disabled={disabled}
-          className={`bg-transparent text-base sm:text-lg placeholder-zinc-400 outline-none flex-1 min-w-0 cursor-pointer ${className}`}
-          calendarClassName="bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg text-zinc-200"
-          dayClassName={() => "hover:bg-zinc-700 rounded"}
+          className={`bg-transparent text-base sm:text-lg outline-none flex-1 min-w-0 cursor-pointer ${
+            theme === "dark"
+              ? "placeholder-zinc-400 text-zinc-100"
+              : "placeholder-zinc-500 text-zinc-900"
+          } ${className}`}
+          calendarClassName={`rounded-lg shadow-lg ${
+            theme === "dark"
+              ? "bg-zinc-800 border border-zinc-700 text-zinc-200"
+              : "bg-white border border-zinc-300 text-zinc-900"
+          }`}
+          dayClassName={() =>
+            theme === "dark"
+              ? "hover:bg-zinc-700 rounded"
+              : "hover:bg-zinc-100 rounded"
+          }
           popperClassName="z-[100]"
           popperPlacement="bottom"
           showPopperArrow={false}
