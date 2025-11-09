@@ -3,6 +3,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { api } from "../lib/axios";
 import { useNotification } from "./Notification/context";
 import { syncService } from "../lib/syncService";
+import { useTheme } from "./ThemeContext";
 
 interface Guest {
   name: string;
@@ -28,6 +29,7 @@ export function GuestList({ tripId }: GuestListProps) {
     shareUrl: string;
   } | null>(null);
   const { showNotification } = useNotification();
+  const { theme } = useTheme();
   const [lastLoadTime, setLastLoadTime] = useState<number>(0);
   // Estado para controlar convidados em processo de sincronização (otimistic UI updates)
   const [pendingGuests, setPendingGuests] = useState<{
@@ -290,18 +292,30 @@ export function GuestList({ tripId }: GuestListProps) {
     <div className="space-y-4">
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium text-zinc-300">
+          <h3
+            className={`text-lg font-medium ${
+              theme === "dark" ? "text-zinc-300" : "text-zinc-900"
+            }`}
+          >
             Quem vai participar da viagem
           </h3>
           <button
             onClick={syncGuests}
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            className={`text-xs transition-colors ${
+              theme === "dark"
+                ? "text-zinc-500 hover:text-zinc-300"
+                : "text-zinc-600 hover:text-zinc-800"
+            }`}
             title="Sincronizar convidados"
           >
             Sincronizar
           </button>
         </div>
-        <p className="text-sm text-zinc-500">
+        <p
+          className={`text-sm ${
+            theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+          }`}
+        >
           Adicione os convidados que vão participar da viagem
         </p>
       </div>
@@ -309,12 +323,20 @@ export function GuestList({ tripId }: GuestListProps) {
       {/* Formulário para adicionar novo convidado */}
       <form
         onSubmit={handleAddGuest}
-        className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800"
+        className={`flex items-center gap-2 p-2 rounded-lg border ${
+          theme === "dark"
+            ? "bg-zinc-900 border-zinc-800"
+            : "bg-white border-zinc-300"
+        }`}
       >
         <input
           type="text"
           placeholder="Nome do convidado..."
-          className="bg-transparent text-zinc-100 placeholder-zinc-500 outline-none flex-1 text-sm p-1"
+          className={`bg-transparent outline-none flex-1 text-sm p-1 ${
+            theme === "dark"
+              ? "text-zinc-100 placeholder-zinc-500"
+              : "text-zinc-900 placeholder-zinc-400"
+          }`}
           value={newGuestName}
           onChange={(e) => setNewGuestName(e.target.value)}
           disabled={isLoading}
@@ -330,13 +352,27 @@ export function GuestList({ tripId }: GuestListProps) {
 
       {/* Link de compartilhamento quando um novo convidado é adicionado */}
       {shareLink && (
-        <div className="p-3 bg-zinc-800 rounded-lg space-y-2 animate-fade-in">
+        <div
+          className={`p-3 rounded-lg space-y-2 animate-fade-in ${
+            theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
+          }`}
+        >
           <div className="flex justify-between items-start gap-2">
             <div>
-              <p className="text-sm font-medium text-zinc-200">
+              <p
+                className={`text-sm font-medium ${
+                  theme === "dark" ? "text-zinc-200" : "text-zinc-900"
+                }`}
+              >
                 {shareLink.guest.name}
               </p>
-              <p className="text-xs text-zinc-400">Link de acesso gerado</p>
+              <p
+                className={`text-xs ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              >
+                Link de acesso gerado
+              </p>
             </div>
             <button
               title="Copiar link de convite"
@@ -347,12 +383,22 @@ export function GuestList({ tripId }: GuestListProps) {
                   "success"
                 );
               }}
-              className="p-2 hover:bg-zinc-700 rounded transition-colors"
+              className={`p-2 rounded transition-colors ${
+                theme === "dark" ? "hover:bg-zinc-700" : "hover:bg-zinc-200"
+              }`}
             >
-              <Share2 className="size-4 text-zinc-400" />
+              <Share2
+                className={`size-4 ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                }`}
+              />
             </button>
           </div>
-          <p className="text-xs text-zinc-500 break-all">
+          <p
+            className={`text-xs break-all ${
+              theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+            }`}
+          >
             {shareLink.shareUrl}
           </p>
           <button
@@ -368,12 +414,20 @@ export function GuestList({ tripId }: GuestListProps) {
       {editingGuest && (
         <form
           onSubmit={handleUpdateGuest}
-          className="flex items-center gap-2 bg-zinc-800 p-2 rounded-lg border border-zinc-700 animate-fade-in"
+          className={`flex items-center gap-2 p-2 rounded-lg border animate-fade-in ${
+            theme === "dark"
+              ? "bg-zinc-800 border-zinc-700"
+              : "bg-zinc-50 border-zinc-300"
+          }`}
         >
           <input
             type="text"
             placeholder="Nome do convidado..."
-            className="bg-transparent text-zinc-100 placeholder-zinc-500 outline-none flex-1 text-sm p-1"
+            className={`bg-transparent outline-none flex-1 text-sm p-1 ${
+              theme === "dark"
+                ? "text-zinc-100 placeholder-zinc-500"
+                : "text-zinc-900 placeholder-zinc-400"
+            }`}
             value={editingGuest.name}
             onChange={(e) =>
               setEditingGuest({ ...editingGuest, name: e.target.value })
@@ -392,7 +446,11 @@ export function GuestList({ tripId }: GuestListProps) {
             <button
               type="button"
               onClick={() => setEditingGuest(null)}
-              className="bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded-md p-1.5 flex items-center justify-center"
+              className={`rounded-md p-1.5 flex items-center justify-center ${
+                theme === "dark"
+                  ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
+                  : "bg-zinc-300 hover:bg-zinc-400 text-zinc-800"
+              }`}
             >
               <X size={16} strokeWidth={3} />
             </button>
@@ -403,32 +461,67 @@ export function GuestList({ tripId }: GuestListProps) {
       {/* Lista de convidados */}
       <div className="space-y-2 max-h-[320px] overflow-y-auto pr-2">
         {isLoading && guests.length === 0 ? (
-          <div className="bg-zinc-800/30 p-4 rounded-lg border border-zinc-700/50 text-center">
-            <p className="text-zinc-500 text-sm">Carregando convidados...</p>
+          <div
+            className={`p-4 rounded-lg border text-center ${
+              theme === "dark"
+                ? "bg-zinc-800/30 border-zinc-700/50"
+                : "bg-zinc-50 border-zinc-200"
+            }`}
+          >
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+              }`}
+            >
+              Carregando convidados...
+            </p>
           </div>
         ) : guests.length > 0 ? (
           guests.map((guest) => (
             <div
               key={guest.accessId}
-              className={`flex items-center justify-between bg-zinc-800/50 p-3 rounded-lg border border-zinc-700/50 group ${
-                pendingGuests[guest.accessId] ? "opacity-70" : ""
-              }`}
+              className={`flex items-center justify-between p-3 rounded-lg border group ${
+                theme === "dark"
+                  ? "bg-zinc-800/50 border-zinc-700/50"
+                  : "bg-zinc-50 border-zinc-200"
+              } ${pendingGuests[guest.accessId] ? "opacity-70" : ""}`}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className="bg-zinc-700 rounded-full p-1.5">
-                  <User size={14} className="text-zinc-300" />
+                <div
+                  className={`rounded-full p-1.5 ${
+                    theme === "dark" ? "bg-zinc-700" : "bg-zinc-300"
+                  }`}
+                >
+                  <User
+                    size={14}
+                    className={`${
+                      theme === "dark" ? "text-zinc-300" : "text-zinc-600"
+                    }`}
+                  />
                 </div>
 
                 <div>
-                  <p className="text-sm text-zinc-200">
+                  <p
+                    className={`text-sm ${
+                      theme === "dark" ? "text-zinc-200" : "text-zinc-900"
+                    }`}
+                  >
                     {guest.name}
                     {pendingGuests[guest.accessId] === "add" && (
-                      <span className="ml-2 text-xs text-zinc-500">
+                      <span
+                        className={`ml-2 text-xs ${
+                          theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+                        }`}
+                      >
                         (sincronizando...)
                       </span>
                     )}
                     {pendingGuests[guest.accessId] === "update" && (
-                      <span className="ml-2 text-xs text-zinc-500">
+                      <span
+                        className={`ml-2 text-xs ${
+                          theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+                        }`}
+                      >
                         (atualizando...)
                       </span>
                     )}
@@ -447,7 +540,11 @@ export function GuestList({ tripId }: GuestListProps) {
                     onClick={() =>
                       handleCopyGuestLink(guest.accessId, guest.name)
                     }
-                    className="text-zinc-500 hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+                      theme === "dark"
+                        ? "text-zinc-500 hover:text-zinc-300"
+                        : "text-zinc-600 hover:text-zinc-800"
+                    }`}
                     title="Copiar link de convite"
                     disabled={!!pendingGuests[guest.accessId]}
                   >
@@ -457,7 +554,11 @@ export function GuestList({ tripId }: GuestListProps) {
                     onClick={() =>
                       setEditingGuest({ id: guest.accessId, name: guest.name })
                     }
-                    className="text-zinc-500 hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+                      theme === "dark"
+                        ? "text-zinc-500 hover:text-zinc-300"
+                        : "text-zinc-600 hover:text-zinc-800"
+                    }`}
                     title="Editar convidado"
                     disabled={!!pendingGuests[guest.accessId]}
                   >
@@ -467,7 +568,11 @@ export function GuestList({ tripId }: GuestListProps) {
                     onClick={() =>
                       handleDeleteGuest(guest.accessId, guest.name)
                     }
-                    className="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+                      theme === "dark"
+                        ? "text-zinc-500 hover:text-red-400"
+                        : "text-zinc-600 hover:text-red-500"
+                    }`}
                     title="Remover convidado"
                     disabled={!!pendingGuests[guest.accessId]}
                   >
@@ -478,8 +583,20 @@ export function GuestList({ tripId }: GuestListProps) {
             </div>
           ))
         ) : (
-          <div className="bg-zinc-800/30 p-4 rounded-lg border border-zinc-700/50 text-center">
-            <p className="text-zinc-500 text-sm">Nenhum convidado adicionado</p>
+          <div
+            className={`p-4 rounded-lg border text-center ${
+              theme === "dark"
+                ? "bg-zinc-800/30 border-zinc-700/50"
+                : "bg-zinc-50 border-zinc-200"
+            }`}
+          >
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-zinc-500" : "text-zinc-600"
+              }`}
+            >
+              Nenhum convidado adicionado
+            </p>
           </div>
         )}
       </div>
