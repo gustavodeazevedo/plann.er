@@ -15,6 +15,7 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import { NotificationProvider } from "./components/Notification/context";
 import { LoadingProvider } from "./components/LoadingContext";
 import { ThemeProvider } from "./components/ThemeContext";
+import { Footer } from "./components/Footer";
 import "./index.css";
 import "./styles/star-button.css";
 
@@ -61,6 +62,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            <Footer />
           </BrowserRouter>
         </LoadingProvider>
       </NotificationProvider>
